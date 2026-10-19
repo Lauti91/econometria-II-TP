@@ -1,0 +1,13 @@
+"serie","muestra","modelo","parametro","estimacion","ee","t"
+"PBI oficial, crec. interanual (%)","completa 2000Q1-2023Q4","ARMA(1,1) + MA estacional(4)","ar1",0.979347287031967,0.0217151169312636,45.0997933896449
+"PBI oficial, crec. interanual (%)","completa 2000Q1-2023Q4","ARMA(1,1) + MA estacional(4)","ma1",0.46463731233415,0.107393422984792,4.32649690661176
+"PBI oficial, crec. interanual (%)","completa 2000Q1-2023Q4","ARMA(1,1) + MA estacional(4)","sma1",0.589543066874774,0.104166330480802,5.65963170780438
+"PBI oficial, crec. interanual (%)","completa 2000Q1-2023Q4","ARMA(1,1) + MA estacional(4)","intercept",7.81596084821931,1.6942196178954,4.61331032037539
+"PBI oficial, crec. interanual (%)","sin COVID 2000Q1-2019Q4","ARMA(1,0)","ar1",0.909028399164106,0.0441850494851828,20.5732122008586
+"PBI oficial, crec. interanual (%)","sin COVID 2000Q1-2019Q4","ARMA(1,0)","intercept",8.69919768787324,1.01953382336947,8.53252485447041
+"Electricidad, crec. interanual (%)","completa 2000Q1-2023Q4","ARMA(1,0) + MA estacional(4)","ar1",0.939239625032656,0.04152280910747,22.6198478672698
+"Electricidad, crec. interanual (%)","completa 2000Q1-2023Q4","ARMA(1,0) + MA estacional(4)","sma1",0.718800670478526,0.0969534886091274,7.41387113336794
+"Electricidad, crec. interanual (%)","completa 2000Q1-2023Q4","ARMA(1,0) + MA estacional(4)","intercept",8.51762432573438,1.52324269529681,5.59177099751309
+"Electricidad, crec. interanual (%)","sin COVID 2000Q1-2019Q4","ARMA(1,0) + MA estacional(4)","ar1",0.940410817059324,0.042551370439256,22.1005999889428
+"Electricidad, crec. interanual (%)","sin COVID 2000Q1-2019Q4","ARMA(1,0) + MA estacional(4)","sma1",0.669182966962339,0.115286819374191,5.80450541176218
+"Electricidad, crec. interanual (%)","sin COVID 2000Q1-2019Q4","ARMA(1,0) + MA estacional(4)","intercept",8.9215019322447,1.72294301838067,5.17805977160504

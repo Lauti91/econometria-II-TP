@@ -159,3 +159,4 @@ if (requireNamespace("openxlsx", quietly = TRUE)) {
                        file.path(dir_out, "base_candidata5_li_keqiang_china.xlsx"))
   message("Listo: ", file.path(dir_out, "base_candidata5_li_keqiang_china.xlsx"))
 } else message("openxlsx no instalado: se escribieron solo los CSV")
+

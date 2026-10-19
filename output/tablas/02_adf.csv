@@ -1,0 +1,55 @@
+"serie","muestra","n","spec","rezagos_AIC","estadistico","cv1","cv5","cv10","rechaza_H0_raiz_unitaria_5pct"
+"PBI oficial, crec. interanual (%)","2000Q1-2023Q4",96,"tau",4,-0.908,-2.6,-1.95,-1.61,FALSE
+"PBI oficial, crec. interanual (%)","2000Q1-2023Q4",96,"tau_mu",4,-2.028,-3.51,-2.89,-2.58,FALSE
+"PBI oficial, crec. interanual (%)","2000Q1-2023Q4",96,"tau_tau",4,-3.684,-4.04,-3.45,-3.15,TRUE
+"Electricidad, crec. interanual (%)","2000Q1-2023Q4",96,"tau",4,-1.078,-2.6,-1.95,-1.61,FALSE
+"Electricidad, crec. interanual (%)","2000Q1-2023Q4",96,"tau_mu",4,-2.628,-3.51,-2.89,-2.58,FALSE
+"Electricidad, crec. interanual (%)","2000Q1-2023Q4",96,"tau_tau",4,-3.994,-4.04,-3.45,-3.15,TRUE
+"ln PBI real (indice encadenado)","2000Q1-2023Q4",96,"tau",4,3.385,-2.6,-1.95,-1.61,FALSE
+"ln PBI real (indice encadenado)","2000Q1-2023Q4",96,"tau_mu",4,-3.418,-3.51,-2.89,-2.58,TRUE
+"ln PBI real (indice encadenado)","2000Q1-2023Q4",96,"tau_tau",4,0.318,-4.04,-3.45,-3.15,FALSE
+"ln Electricidad (GWh, trimestral)","2000Q1-2023Q4",96,"tau",4,3.108,-2.6,-1.95,-1.61,FALSE
+"ln Electricidad (GWh, trimestral)","2000Q1-2023Q4",96,"tau_mu",4,-2.773,-3.51,-2.89,-2.58,FALSE
+"ln Electricidad (GWh, trimestral)","2000Q1-2023Q4",96,"tau_tau",4,-1.682,-4.04,-3.45,-3.15,FALSE
+"D ln PBI real (indice encadenado)","2000Q2-2023Q4",95,"tau",4,-1.131,-2.6,-1.95,-1.61,FALSE
+"D ln PBI real (indice encadenado)","2000Q2-2023Q4",95,"tau_mu",4,-3.059,-3.51,-2.89,-2.58,TRUE
+"D ln PBI real (indice encadenado)","2000Q2-2023Q4",95,"tau_tau",4,-5.697,-4.04,-3.45,-3.15,TRUE
+"D4 ln PBI real (indice encadenado)","2001Q1-2023Q4",92,"tau",4,-0.877,-2.6,-1.95,-1.61,FALSE
+"D4 ln PBI real (indice encadenado)","2001Q1-2023Q4",92,"tau_mu",4,-1.987,-3.51,-2.89,-2.58,FALSE
+"D4 ln PBI real (indice encadenado)","2001Q1-2023Q4",92,"tau_tau",4,-4.176,-4.04,-3.45,-3.15,TRUE
+"D D4 ln PBI real (indice encadenado)","2001Q2-2023Q4",91,"tau",4,-7.502,-2.6,-1.95,-1.61,TRUE
+"D D4 ln PBI real (indice encadenado)","2001Q2-2023Q4",91,"tau_mu",4,-7.48,-3.51,-2.89,-2.58,TRUE
+"D D4 ln PBI real (indice encadenado)","2001Q2-2023Q4",91,"tau_tau",4,-7.479,-4.04,-3.45,-3.15,TRUE
+"D ln Electricidad (GWh, trimestral)","2000Q2-2023Q4",95,"tau",4,-1.979,-2.6,-1.95,-1.61,TRUE
+"D ln Electricidad (GWh, trimestral)","2000Q2-2023Q4",95,"tau_mu",4,-3.863,-3.51,-2.89,-2.58,TRUE
+"D ln Electricidad (GWh, trimestral)","2000Q2-2023Q4",95,"tau_tau",4,-4.659,-4.04,-3.45,-3.15,TRUE
+"D4 ln Electricidad (GWh, trimestral)","2001Q1-2023Q4",92,"tau",4,-1.126,-2.6,-1.95,-1.61,FALSE
+"D4 ln Electricidad (GWh, trimestral)","2001Q1-2023Q4",92,"tau_mu",4,-2.579,-3.51,-2.89,-2.58,FALSE
+"D4 ln Electricidad (GWh, trimestral)","2001Q1-2023Q4",92,"tau_tau",4,-4.116,-4.04,-3.45,-3.15,TRUE
+"D D4 ln Electricidad (GWh, trimestral)","2001Q2-2023Q4",91,"tau",4,-7.025,-2.6,-1.95,-1.61,TRUE
+"D D4 ln Electricidad (GWh, trimestral)","2001Q2-2023Q4",91,"tau_mu",4,-6.985,-3.51,-2.89,-2.58,TRUE
+"D D4 ln Electricidad (GWh, trimestral)","2001Q2-2023Q4",91,"tau_tau",4,-6.937,-4.04,-3.45,-3.15,TRUE
+"PBI oficial, crec. interanual (%)","2000Q1-2019Q4 (sin COVID)",80,"tau",4,-0.809,-2.6,-1.95,-1.61,FALSE
+"PBI oficial, crec. interanual (%)","2000Q1-2019Q4 (sin COVID)",80,"tau_mu",4,-1.68,-3.51,-2.89,-2.58,FALSE
+"PBI oficial, crec. interanual (%)","2000Q1-2019Q4 (sin COVID)",80,"tau_tau",4,-2.632,-4.04,-3.45,-3.15,FALSE
+"PBI oficial, crec. interanual (%)","2010Q1-2023Q4",56,"tau",3,-1.451,-2.6,-1.95,-1.61,FALSE
+"PBI oficial, crec. interanual (%)","2010Q1-2023Q4",56,"tau_mu",3,-4.037,-3.51,-2.89,-2.58,TRUE
+"PBI oficial, crec. interanual (%)","2010Q1-2023Q4",56,"tau_tau",3,-6.01,-4.04,-3.45,-3.15,TRUE
+"Electricidad, crec. interanual (%)","2000Q1-2019Q4 (sin COVID)",80,"tau",4,-0.841,-2.6,-1.95,-1.61,FALSE
+"Electricidad, crec. interanual (%)","2000Q1-2019Q4 (sin COVID)",80,"tau_mu",4,-2.18,-3.51,-2.89,-2.58,FALSE
+"Electricidad, crec. interanual (%)","2000Q1-2019Q4 (sin COVID)",80,"tau_tau",4,-3.464,-4.04,-3.45,-3.15,TRUE
+"Electricidad, crec. interanual (%)","2010Q1-2023Q4",56,"tau",3,-1.504,-2.6,-1.95,-1.61,FALSE
+"Electricidad, crec. interanual (%)","2010Q1-2023Q4",56,"tau_mu",3,-3.454,-3.51,-2.89,-2.58,TRUE
+"Electricidad, crec. interanual (%)","2010Q1-2023Q4",56,"tau_tau",3,-3.44,-4.04,-3.45,-3.15,FALSE
+"ln PBI real (indice encadenado)","2000Q1-2019Q4 (sin COVID)",80,"tau",4,1.013,-2.6,-1.95,-1.61,FALSE
+"ln PBI real (indice encadenado)","2000Q1-2019Q4 (sin COVID)",80,"tau_mu",4,-2.063,-3.51,-2.89,-2.58,FALSE
+"ln PBI real (indice encadenado)","2000Q1-2019Q4 (sin COVID)",80,"tau_tau",4,-0.546,-4.04,-3.45,-3.15,FALSE
+"ln PBI real (indice encadenado)","2010Q1-2023Q4",56,"tau",3,14.217,-2.6,-1.95,-1.61,FALSE
+"ln PBI real (indice encadenado)","2010Q1-2023Q4",56,"tau_mu",3,-3.242,-3.51,-2.89,-2.58,TRUE
+"ln PBI real (indice encadenado)","2010Q1-2023Q4",56,"tau_tau",3,-1.46,-4.04,-3.45,-3.15,FALSE
+"ln Electricidad (GWh, trimestral)","2000Q1-2019Q4 (sin COVID)",80,"tau",4,2.453,-2.6,-1.95,-1.61,FALSE
+"ln Electricidad (GWh, trimestral)","2000Q1-2019Q4 (sin COVID)",80,"tau_mu",4,-2.457,-3.51,-2.89,-2.58,FALSE
+"ln Electricidad (GWh, trimestral)","2000Q1-2019Q4 (sin COVID)",80,"tau_tau",4,-1.384,-4.04,-3.45,-3.15,FALSE
+"ln Electricidad (GWh, trimestral)","2010Q1-2023Q4",56,"tau",3,8.955,-2.6,-1.95,-1.61,FALSE
+"ln Electricidad (GWh, trimestral)","2010Q1-2023Q4",56,"tau_mu",3,-1.054,-3.51,-2.89,-2.58,FALSE
+"ln Electricidad (GWh, trimestral)","2010Q1-2023Q4",56,"tau_tau",3,-2.896,-4.04,-3.45,-3.15,FALSE

@@ -1,0 +1,10 @@
+"serie","muestra","base","extra","t_extra","signif_5pct","dSBC"
+"PBI oficial, crec. interanual (%)","completa 2000Q1-2023Q4","ARMA(1,1) + MA estacional(4)","ar2",-0.733882720963003,FALSE,4.08359207702239
+"PBI oficial, crec. interanual (%)","completa 2000Q1-2023Q4","ARMA(1,1) + MA estacional(4)","ma2",-0.610173368008019,FALSE,4.19327914550604
+"PBI oficial, crec. interanual (%)","sin COVID 2000Q1-2019Q4","ARMA(1,0)","ar2",-0.64435258792079,FALSE,3.96791480040042
+"PBI oficial, crec. interanual (%)","sin COVID 2000Q1-2019Q4","ARMA(1,0)","ma1",0.604032455085111,FALSE,4.02414083761107
+"PBI oficial, crec. interanual (%)","sin COVID 2000Q1-2019Q4","ARMA(1,0)","sma1",-0.236984024652198,FALSE,4.32571124789297
+"Electricidad, crec. interanual (%)","completa 2000Q1-2023Q4","ARMA(1,0) + MA estacional(4)","ar2",1.28314806718097,FALSE,2.92880113552496
+"Electricidad, crec. interanual (%)","completa 2000Q1-2023Q4","ARMA(1,0) + MA estacional(4)","ma1",-1.27330209597572,FALSE,2.92653656103175
+"Electricidad, crec. interanual (%)","sin COVID 2000Q1-2019Q4","ARMA(1,0) + MA estacional(4)","ar2",-0.972249241905833,FALSE,3.44446070831185
+"Electricidad, crec. interanual (%)","sin COVID 2000Q1-2019Q4","ARMA(1,0) + MA estacional(4)","ma1",1.12528487832641,FALSE,3.18361428043733
