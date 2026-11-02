@@ -4,7 +4,7 @@
 #
 # Series (muestra principal 2000Q1-2023Q4, 96 trimestres):
 #   Y = PBI oficial       X = Electricidad
-# Dos tratamientos en paralelo (regla acordada, ver claude/reglas_TP.md):
+# Dos tratamientos en paralelo (regla acordada con la catedra):
 #   (a) crecimiento interanual (%)           -> ya sin estacionalidad (diferencia 1-B^4)
 #   (b) logaritmo de los niveles             -> conserva tendencia y estacionalidad
 #
