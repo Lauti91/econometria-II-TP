@@ -1,11 +1,5 @@
-# Econometría II — Trabajo práctico
+# Econometría II — Par secundario: índice Li Keqiang (China)
 
-Cátedra Mirta L. González (FCE-UBA). Todo en R.
+PBI oficial de China vs. electricidad y carga ferroviaria. Par complementario, no es el trabajo principal (ver rama `main`).
 
-| Carpeta | Contenido |
-|---|---|
-| `viviendas_tasa/` | **Trabajo principal**: inicios de viviendas y tasa hipotecaria (EE.UU.). Informe en `informe/`. Correr `Rscript 00_correr_todo.R` desde esa carpeta. |
-| `china_li_keqiang/` | Par complementario: PBI de China vs. electricidad (índice Li Keqiang). Scripts numerados en `scripts/`, correr desde esa carpeta. |
-| `aereo_desempleo/` | Par de reserva: tráfico aéreo y desempleo (EE.UU.). |
-
-Cada carpeta tiene sus datos, sus scripts y sus salidas (gráficos, tablas y salidas con formato EViews).
+Scripts numerados en `china_li_keqiang/scripts/`; correr desde `china_li_keqiang/`.
