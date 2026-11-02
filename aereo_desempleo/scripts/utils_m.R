@@ -1,10 +1,10 @@
 # =============================================================================
-# utils_m.R -- Version mensual de las herramientas de ../china_li_keqiang/scripts/utils.R (se usa con source())
+# utils_m.R -- Version mensual de las herramientas de scripts/utils.R (se usa con source())
 # Reutiliza el estilo, jarque_bera() y modulos() del TP principal, y redefine lo que dependia de la
 # frecuencia trimestral: dummies, ADF, ajuste con MA estacional de rezago s = frequency(x), rejilla y
 # Ljung-Box en 12, 24 y 36 rezagos.
 # =============================================================================
-source("../china_li_keqiang/scripts/utils.R"); source("../china_li_keqiang/scripts/eviews.R")
+source("scripts/utils.R"); source("scripts/eviews.R")
 col_viv <- "#2A62B8"; col_tasa <- "#D9701F"; col_bono <- "#9AA5B1"       # inicios azul, tasa naranja
 
 cargar_base <- function() {
