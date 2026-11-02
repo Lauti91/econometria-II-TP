@@ -1,0 +1,9 @@
+"muestra","tratamiento","direccion","n","pendiente","t_ingenuo","R2","DW","alarma_R2_mayor_DW","rho1_resid","LB8_p"
+"completa 2000Q1-2023Q4","yoy","PBI ~ Electricidad",96,0.429,11.177,0.571,0.905,FALSE,0.532,0
+"completa 2000Q1-2023Q4","yoy","Electricidad ~ PBI",96,1.33,11.177,0.571,0.806,FALSE,0.584,0
+"completa 2000Q1-2023Q4","Delta(yoy)","PBI ~ Electricidad",95,0.397,8.114,0.415,2.618,FALSE,-0.312,0
+"completa 2000Q1-2023Q4","Delta(yoy)","Electricidad ~ PBI",95,1.045,8.114,0.415,2.063,FALSE,-0.042,0.004
+"sin COVID 2000Q1-2019Q4","yoy","PBI ~ Electricidad",80,0.298,10.016,0.563,0.619,FALSE,0.673,0
+"sin COVID 2000Q1-2019Q4","yoy","Electricidad ~ PBI",80,1.887,10.016,0.563,0.884,FALSE,0.547,0
+"sin COVID 2000Q1-2019Q4","Delta(yoy)","PBI ~ Electricidad",79,0.095,3.558,0.141,2.478,FALSE,-0.239,0.023
+"sin COVID 2000Q1-2019Q4","Delta(yoy)","Electricidad ~ PBI",79,1.487,3.558,0.141,2.217,FALSE,-0.116,0.024

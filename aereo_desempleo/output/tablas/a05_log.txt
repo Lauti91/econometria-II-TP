@@ -1,0 +1,104 @@
+
+=== RPM: orden elegido con 2000-2016 ===
+ filtro p q Qs    SBC admisible  dSBC
+     F3 1 0  1 883.72      TRUE  0.00
+     F2 2 0  1 886.96      TRUE  3.24
+    F2t 2 0  1 892.01      TRUE  8.28
+     F1 1 0  1 893.84      TRUE 10.12
+     F0 2 0  1 903.92      TRUE 20.20
+
+Desempleo: orden elegido con 2000-2016 en (1-B)(1-B^12) 100 ln: ARMA(2,1)+SMA(12) (admisible: FALSE)
+
+=== Metricas 2017-2019 (RPM: % de 100 ln; desempleo: pp). RMSE_rel_PAE < 1: mejor que el paseo aleatorio estacional ===
+     serie                     modelo  h  n  RMSE   MAE cobertura95
+ Desempleo           F3 (ganador a03)  1 36 0.142 0.120          NA
+ Desempleo Paseo aleatorio estacional  1 36 0.148 0.127          NA
+ Desempleo         Ingenuo estacional  1 36 0.437 0.400          NA
+ Desempleo Paseo aleatorio estacional  3 34 0.184 0.147          NA
+ Desempleo           F3 (ganador a03)  3 34 0.240 0.201          NA
+ Desempleo         Ingenuo estacional  3 34 0.445 0.409          NA
+ Desempleo           F3 (ganador a03)  6 31 0.178 0.145          NA
+ Desempleo Paseo aleatorio estacional  6 31 0.184 0.148          NA
+ Desempleo         Ingenuo estacional  6 31 0.438 0.400          NA
+ Desempleo           F3 (ganador a03) 12 25 0.196 0.174          NA
+ Desempleo Paseo aleatorio estacional 12 25 0.231 0.198          NA
+ Desempleo         Ingenuo estacional 12 25 0.386 0.352          NA
+       RPM                         F1  1 36 1.560 1.187       0.972
+       RPM                         F3  1 36 1.569 1.175       0.972
+       RPM                        F2t  1 36 1.570 1.150       0.972
+       RPM            Comb. 2 mejores  1 36 1.575 1.154          NA
+       RPM                         F2  1 36 1.590 1.145       0.972
+       RPM                         F0  1 36 1.651 1.233       0.972
+       RPM Paseo aleatorio estacional  1 36 2.297 1.622          NA
+       RPM         Ingenuo estacional  1 36 4.401 4.146          NA
+       RPM                         F3  3 34 1.481 1.157       1.000
+       RPM                        F2t  3 34 1.543 1.203       1.000
+       RPM            Comb. 2 mejores  3 34 1.545 1.201          NA
+       RPM                         F2  3 34 1.655 1.310       1.000
+       RPM                         F1  3 34 1.684 1.308       1.000
+       RPM Paseo aleatorio estacional  3 34 1.831 1.457          NA
+       RPM                         F0  3 34 2.112 1.738       1.000
+       RPM         Ingenuo estacional  3 34 4.497 4.286          NA
+       RPM                         F1  6 31 1.429 1.125       1.000
+       RPM                         F3  6 31 1.587 1.224       1.000
+       RPM            Comb. 2 mejores  6 31 1.775 1.402          NA
+       RPM                        F2t  6 31 1.784 1.416       1.000
+       RPM                         F2  6 31 2.072 1.723       1.000
+       RPM Paseo aleatorio estacional  6 31 2.180 1.446          NA
+       RPM                         F0  6 31 2.770 2.585       1.000
+       RPM         Ingenuo estacional  6 31 4.534 4.323          NA
+       RPM                         F3 12 25 1.901 1.577       1.000
+       RPM                         F1 12 25 2.211 1.870       1.000
+       RPM            Comb. 2 mejores 12 25 2.458 2.187          NA
+       RPM                        F2t 12 25 2.507 2.248       1.000
+       RPM Paseo aleatorio estacional 12 25 2.531 1.804          NA
+       RPM                         F2 12 25 3.135 2.896       1.000
+       RPM         Ingenuo estacional 12 25 4.673 4.479          NA
+       RPM                         F0 12 25 5.177 4.988       1.000
+ RMSE_rel_PAE
+        0.963
+        1.000
+        2.951
+        1.000
+        1.309
+        2.424
+        0.967
+        1.000
+        2.387
+        0.850
+        1.000
+        1.673
+        0.679
+        0.683
+        0.684
+        0.686
+        0.693
+        0.719
+        1.000
+        1.916
+        0.809
+        0.843
+        0.844
+        0.904
+        0.920
+        1.000
+        1.153
+        2.456
+        0.656
+        0.728
+        0.814
+        0.818
+        0.950
+        1.000
+        1.271
+        2.080
+        0.751
+        0.873
+        0.971
+        0.991
+        1.000
+        1.239
+        1.846
+        2.045
+Don't know how to automatically pick scale for object of type <ts>. Defaulting
+to continuous.

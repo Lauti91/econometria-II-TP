@@ -2,3 +2,12 @@
 .Rhistory
 .RData
 .Ruserdata
+# Auxiliares de LaTeX
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.out
+*.toc
+# Intermedios que se regeneran al correr los scripts
+*.rds

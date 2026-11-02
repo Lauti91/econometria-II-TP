@@ -1,0 +1,9 @@
+"serie","muestra","tratamiento","n","modelo","SBC","sigma","min_mod_AR","min_mod_MA","LB12_p"
+"PBI oficial, crec. interanual (%)","completa 2000Q1-2023Q4","yoy",96,"ARMA(1,1)+SMA(4)",438.463,2.082,1.021,1.141,0.669
+"PBI oficial, crec. interanual (%)","completa 2000Q1-2023Q4","Delta(yoy)",95,"ARMA(0,1)+SMA(4)",428.681,2.071,Inf,1.113,0.741
+"PBI oficial, crec. interanual (%)","sin COVID 2000Q1-2019Q4","yoy",80,"ARMA(1,0)",228.253,0.918,1.1,Inf,0.474
+"PBI oficial, crec. interanual (%)","sin COVID 2000Q1-2019Q4","Delta(yoy)",79,"ARMA(0,0)",223.086,0.94,Inf,Inf,0.325
+"Electricidad, crec. interanual (%)","completa 2000Q1-2023Q4","yoy",96,"ARMA(1,0)+SMA(4)",527.833,3.378,1.065,1.086,0.475
+"Electricidad, crec. interanual (%)","completa 2000Q1-2023Q4","Delta(yoy)",95,"ARMA(0,0)+SMA(4)",520.553,3.422,Inf,1.069,0.466
+"Electricidad, crec. interanual (%)","sin COVID 2000Q1-2019Q4","yoy",80,"ARMA(1,0)+SMA(4)",422.533,2.984,1.063,1.106,0.859
+"Electricidad, crec. interanual (%)","sin COVID 2000Q1-2019Q4","Delta(yoy)",79,"ARMA(0,0)+SMA(4)",415.118,3.027,Inf,1.088,0.881

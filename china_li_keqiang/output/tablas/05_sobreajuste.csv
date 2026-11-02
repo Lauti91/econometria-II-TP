@@ -1,0 +1,31 @@
+"serie","muestra","base","extra","t_extra","signif_5pct","dSBC"
+"Electricidad","completa (hasta 2023Q4)","F2t: (1-B^4)x + tendencia | ARMA(1,0)+SMA(4)","ar2",0.996944508944493,FALSE,3.51644950316745
+"Electricidad","completa (hasta 2023Q4)","F2t: (1-B^4)x + tendencia | ARMA(1,0)+SMA(4)","ma1",-0.885621394782293,FALSE,3.72652511640598
+"Ferrocarril","completa (hasta 2023Q4)","F1: (1-B)x + dummies | ARMA(0,0)","ar1",-0.339549214288012,FALSE,4.14746802586762
+"Ferrocarril","completa (hasta 2023Q4)","F1: (1-B)x + dummies | ARMA(0,0)","ma1",-0.455727416367736,FALSE,4.06145035590453
+"Ferrocarril","completa (hasta 2023Q4)","F1: (1-B)x + dummies | ARMA(0,0)","sma1",1.44032037140949,FALSE,2.19228713210771
+"PBI real","completa (hasta 2023Q4)","F3: (1-B)(1-B^4)x | ARMA(0,1)+SMA(4)","ar1",0.880591706025862,FALSE,3.77979112786613
+"PBI real","completa (hasta 2023Q4)","F3: (1-B)(1-B^4)x | ARMA(0,1)+SMA(4)","ma2",-0.816969972912156,FALSE,3.85448665509483
+"Electricidad","completa + AO 2008Q4 y 2020Q1","F3: (1-B)(1-B^4)x | ARMA(0,0)+SMA(4)","ar1",-0.84077565843622,FALSE,3.79235050156387
+"Electricidad","completa + AO 2008Q4 y 2020Q1","F3: (1-B)(1-B^4)x | ARMA(0,0)+SMA(4)","ma1",-0.834316719672383,FALSE,3.79710636716908
+"Ferrocarril","completa + AO 2008Q4 y 2020Q1","F1: (1-B)x + dummies | ARMA(0,0)","ar1",-0.188068705148478,FALSE,4.22728973958823
+"Ferrocarril","completa + AO 2008Q4 y 2020Q1","F1: (1-B)x + dummies | ARMA(0,0)","ma1",-0.24440743396566,FALSE,4.2042510030696
+"Ferrocarril","completa + AO 2008Q4 y 2020Q1","F1: (1-B)x + dummies | ARMA(0,0)","sma1",0.856591904404562,FALSE,3.53317636221749
+"PBI real","completa + AO 2008Q4 y 2020Q1","F3: (1-B)(1-B^4)x | ARMA(0,0)+SMA(4)","ar1",-1.86962717200427,FALSE,1.01150651633219
+"PBI real","completa + AO 2008Q4 y 2020Q1","F3: (1-B)(1-B^4)x | ARMA(0,0)+SMA(4)","ma1",-1.7858110239269,FALSE,1.29677521904472
+"Electricidad","sin COVID (hasta 2019Q4)","F2t: (1-B^4)x + tendencia | ARMA(1,0)+SMA(4)","ar2",-1.33722924797688,FALSE,2.59584828588481
+"Electricidad","sin COVID (hasta 2019Q4)","F2t: (1-B^4)x + tendencia | ARMA(1,0)+SMA(4)","ma1",1.25946745040094,FALSE,2.83520899345785
+"Ferrocarril","sin COVID (hasta 2019Q4)","F1: (1-B)x + dummies | ARMA(0,0)","ar1",0.399370159098279,FALSE,3.8480092762627
+"Ferrocarril","sin COVID (hasta 2019Q4)","F1: (1-B)x + dummies | ARMA(0,0)","ma1",0.545482892451506,FALSE,3.70363017614909
+"Ferrocarril","sin COVID (hasta 2019Q4)","F1: (1-B)x + dummies | ARMA(0,0)","sma1",1.36962892356318,FALSE,2.11278027317081
+"PBI real","sin COVID (hasta 2019Q4)","F3: (1-B)(1-B^4)x | ARMA(0,0)","ar1",0.767925431500348,FALSE,3.73033689057274
+"PBI real","sin COVID (hasta 2019Q4)","F3: (1-B)(1-B^4)x | ARMA(0,0)","ma1",0.753543993656831,FALSE,3.7686161782444
+"PBI real","sin COVID (hasta 2019Q4)","F3: (1-B)(1-B^4)x | ARMA(0,0)","sma1",-0.952969356194023,FALSE,3.40104480176512
+"Electricidad","sin COVID + AO 2008Q4","F3: (1-B)(1-B^4)x | ARMA(0,0)+SMA(4)","ar1",0.124635165181812,FALSE,4.30202293967039
+"Electricidad","sin COVID + AO 2008Q4","F3: (1-B)(1-B^4)x | ARMA(0,0)+SMA(4)","ma1",0.13593139805896,FALSE,4.29911118576933
+"Ferrocarril","sin COVID + AO 2008Q4","F1: (1-B)x + dummies | ARMA(0,0)","ar1",0.322169351729998,FALSE,3.90381214823879
+"Ferrocarril","sin COVID + AO 2008Q4","F1: (1-B)x + dummies | ARMA(0,0)","ma1",0.420750634303623,FALSE,3.82208083208502
+"Ferrocarril","sin COVID + AO 2008Q4","F1: (1-B)x + dummies | ARMA(0,0)","sma1",1.01053064125684,FALSE,2.99022559656839
+"PBI real","sin COVID + AO 2008Q4","F3: (1-B)(1-B^4)x | ARMA(0,0)","ar1",0.261061413102911,FALSE,4.24996151557096
+"PBI real","sin COVID + AO 2008Q4","F3: (1-B)(1-B^4)x | ARMA(0,0)","ma1",0.248424899988224,FALSE,4.25671720697895
+"PBI real","sin COVID + AO 2008Q4","F3: (1-B)(1-B^4)x | ARMA(0,0)","sma1",-0.705124392922756,FALSE,3.81680865826203
