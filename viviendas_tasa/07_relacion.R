@@ -3,7 +3,8 @@
 #   1. Regresion en niveles y la alarma de regresion espuria R^2 > d_W (Granger-Newbold; Nota 6, Sec. 3.3)
 #   2. Correlacion cruzada de las innovaciones de los modelos univariados (04 y 05) y test de Haugh:
 #      S = n sum_{k=-M}^{M} r_k^2 ~ chi2(2M+1) bajo independencia. k > 0: la tasa anticipa a los inicios;
-#      k < 0: los inicios anticipan a la tasa (retroalimentacion via la Fed).
+#      k < 0: los inicios anticipan a la tasa (retroalimentacion via la Fed). Por direccion se excluye k = 0
+#      (contemporaneo, sin direccion): M grados de libertad de cada lado.
 #   3. Rezagos distribuidos con el MISMO filtro (1-B)(1-B^12) de ambos lados: si y = v(B)x + n, entonces
 #      F(B)y = v(B)F(B)x + F(B)n y la respuesta v(B) no cambia. Es un anticipo de la funcion de
 #      transferencia (segunda parte): la inferencia por MCO es orientativa (el ruido F(B)n esta autocorrelacionado).
@@ -35,19 +36,19 @@ ev <- ts(as.numeric(residuals(M4$m)), start = start(M4$W), frequency = 12); et <
 Z <- ts.intersect(ev, et)
 ccf_tab <- function(desde, hasta, nombre) {
   z <- window(Z, start = desde, end = hasta); n <- nrow(z)
-  r <- ccf(as.numeric(z[, "et"]), as.numeric(z[, "ev"]), lag.max = 24, plot = FALSE)   # r(k) = corr(et_t, ev_{t+k})
+  r <- ccf(as.numeric(z[, "ev"]), as.numeric(z[, "et"]), lag.max = 24, plot = FALSE)   # ccf(a, b) da corr(a_{t+k}, b_t): r(k) = corr(et_t, ev_{t+k})
   data.frame(periodo = nombre, k = as.numeric(r$lag), r = as.numeric(r$acf), banda = 1.96 / sqrt(n), n = n)
 }
 CC <- rbind(ccf_tab(start(Z), end(Z), "1986--2026"), ccf_tab(start(Z), c(2007, 12), "1986--2007"), ccf_tab(c(2008, 1), end(Z), "2008--2026"))
 CC$sig <- abs(CC$r) > CC$banda
-haugh <- function(d, M, lado = "ambos") { d <- d[abs(d$k) <= M & (lado == "ambos" | (lado == "pos" & d$k >= 0) | (lado == "neg" & d$k < 0)), ]
+haugh <- function(d, M, lado = "ambos") { d <- d[abs(d$k) <= M & (lado == "ambos" | (lado == "pos" & d$k > 0) | (lado == "neg" & d$k < 0)), ]
   S <- d$n[1] * sum(d$r^2); c(S = S, gl = nrow(d), p = pchisq(S, nrow(d), lower.tail = FALSE)) }
 HA <- do.call(rbind, lapply(split(CC, factor(CC$periodo, levels = unique(CC$periodo))), function(d) data.frame(periodo = d$periodo[1], n = d$n[1],
   M6 = haugh(d, 6)["S"], gl6 = haugh(d, 6)["gl"], p6 = haugh(d, 6)["p"], M12 = haugh(d, 12)["S"], gl12 = haugh(d, 12)["gl"], p12 = haugh(d, 12)["p"],
   pos = haugh(d, 12, "pos")["p"], neg = haugh(d, 12, "neg")["p"])))
 tabla_tex(data.frame(HA$periodo, HA$n, sprintf("%s (%d)", num(HA$M6, 1), HA$gl6), sapply(HA$p6, pval), sprintf("%s (%d)", num(HA$M12, 1), HA$gl12), sapply(HA$p12, pval),
                      sapply(HA$pos, pval), sapply(HA$neg, pval)),
-          "07_haugh.tex", rojo = which(cbind(NA, NA, NA, HA$p6, NA, HA$p12, HA$pos, HA$neg) < 0.05, arr.ind = TRUE), "lccccccc", c("Per\\'iodo", "$n$", "$S$, $M{=}6$ (gl)", "$p$", "$S$, $M{=}12$ (gl)", "$p$", "$p$, solo $k\\geq0$", "$p$, solo $k<0$"))
+          "07_haugh.tex", rojo = which(cbind(NA, NA, NA, HA$p6, NA, HA$p12, HA$pos, HA$neg) < 0.05, arr.ind = TRUE), "lccccccc", c("Per\\'iodo", "$n$", "$S$, $M{=}6$ (gl)", "$p$", "$S$, $M{=}12$ (gl)", "$p$", "$p$, solo $k>0$", "$p$, solo $k<0$"))
 sig <- CC[CC$sig & CC$periodo == "1986--2026", ]
 guardar_valor("CCsig", paste(sprintf("$k=%d$ (%s)", sig$k, num(sig$r, 2)), collapse = ", "))
 guardar_valor("HaughSeisP", pval(HA$p6[1])); guardar_valor("HaughDocePos", pval(HA$pos[1])); guardar_valor("HaughDoceNeg", pval(HA$neg[1]))

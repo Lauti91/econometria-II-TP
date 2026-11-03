@@ -5,7 +5,8 @@
 #   modelo se elige solo con la muestra de estimacion (Nota 5, Sec. 9: si no, la comparacion esta
 #   contaminada) y queda fijo.
 #   Inicios: lineas aereas (F3), el rival F2 con su constante, su promedio (Nota 6, Sec. 11) y dos
-#   referencias ingenuas: ingenuo estacional x_{T+h-12} y paseo aleatorio estacional.
+#   referencias ingenuas: ingenuo estacional x_{T+h-12} y paseo aleatorio estacional, que aca es el modelo de
+#   lineas aereas sin MA, ARIMA(0,1,0)(0,1,0)12: x_{T+h} = x_{T+h-12} + (x_T - x_{T-12}).
 #   Tasa: ARIMA(0,1,1) contra el paseo aleatorio.
 #   Metricas: RMSE y MAE en % (100 ln), MAPE y U de Theil sobre los niveles (miles de viviendas, %).
 #   Al final: pronostico de 12 meses desde el ultimo dato (2026-08) con bandas del 95%.

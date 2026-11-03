@@ -224,7 +224,8 @@ Residuos de los dos modelos univariados; banda $\pm\BandaCC$; $S=n\sum_{-M}^{M}r
 \tabla{07_haugh.tex}{Test de Haugh. Las dos \'ultimas columnas separan la direcci\'on ($M=12$).}{tab:haugh}
 \begin{itemize}
 \item \textbf{No son independientes} ($M=6$: $p\ \HaughSeisP$).
-\item \textbf{Retroalimentaci\'on:} en toda la muestra domina inicios $\to$ tasa ($k<0$: $p=\HaughDoceNeg$; $k\ge0$: $p=\HaughDocePos$). Tasa $\to$ inicios solo en 1986--2007 ($p=0{,}047$).
+\item \textbf{Direcci\'on:} en toda la muestra domina tasa $\to$ inicios ($k>0$: $p=\HaughDocePos$), con correlaciones negativas a 3, 5 y 6 meses.
+\item \textbf{Retroalimentaci\'on:} inicios $\to$ tasa no es significativa en conjunto ($k<0$: $p=\HaughDoceNeg$), pero $r_{-1}=0{,}15$ s\'i lo es, y en 1986--2007 la direcci\'on es significativa ($p=0{,}043$).
 \end{itemize}
 
 \subsection{Rezagos distribuidos con el mismo filtro}
@@ -240,7 +241,7 @@ $F(B)=(1-B)(1-B^{12})$ en ambas series: $F(B)x_t=v(B)F(B)y_t+F(B)n_t$, con $v(B)
 %======================================================================
 \section{Limitaciones y pasos siguientes}
 \begin{itemize}
-\item \textbf{Exogeneidad:} hay retroalimentaci\'on. Opciones: acotar a 1986--2007 o usar el bono a 10 a\~nos como causa.
+\item \textbf{Exogeneidad:} hay retroalimentaci\'on de corto plazo (inicios $\to$ tasa a un mes). Opciones: VAR, que trata a ambas como end\'ogenas, o el bono a 10 a\~nos como causa.
 \item \textbf{Intervenciones:} 2020-04 (inicios); 2008-12, 2013-06 y 2022 (tasa).
 \item \textbf{Varianza:} heterocedasticidad en ambas series; colas pesadas en la tasa.
 \item \textbf{Estacionalidad:} la ra\'iz estacional se decidi\'o por correlograma y SBC (HEGY fuera del programa).

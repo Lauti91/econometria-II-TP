@@ -294,12 +294,12 @@ En niveles, $\ln$ inicios sobre $\ln$ tasa da pendiente \emph{positiva} ($\NivPe
 
 \textbf{Haugh.} $S=n\sum_{k=-M}^{M}r_k^2\sim\chi^2_{2M+1}$ bajo independencia. Con $M=6$: $p\ \HaughSeisP$, no son independientes. Separo por direcci\'on, con $r_k=\operatorname{corr}(\hat a^{\text{tasa}}_t,\hat a^{\text{inicios}}_{t+k})$:
 \begin{itemize}
-\item $k\ge0$ (la tasa anticipa a los inicios): $p=\HaughDocePos$ en toda la muestra; $p=0{,}047$ en 1986--2007.
-\item $k<0$ (los inicios anticipan a la tasa): $p=\HaughDoceNeg$.
+\item $k>0$ (la tasa anticipa a los inicios): $p=\HaughDocePos$ en toda la muestra, con correlaciones negativas a 3, 5 y 6 meses.
+\item $k<0$ (los inicios anticipan a la tasa): $p=\HaughDoceNeg$ en conjunto, pero $r_{-1}=0{,}15$ es significativa, y en 1986--2007 la direcci\'on es significativa ($p=0{,}043$).
 \end{itemize}
-\textbf{Lectura}: hay retroalimentaci\'on. Cuando la construcci\'on sorprende para arriba, la tasa sube despu\'es, porque la Fed y el mercado leen la actividad. Despu\'es de 2008 la direcci\'on tasa $\to$ inicios se pierde: la tasa la manejan las compras de la Fed.
+\textbf{Lectura}: la direcci\'on principal es tasa $\to$ inicios, con el signo esperado: sube la tasa y los inicios caen un trimestre despu\'es. Hay adem\'as retroalimentaci\'on de corto plazo: cuando la construcci\'on sorprende para arriba, la tasa sube al mes siguiente, porque la Fed y el mercado leen la actividad. Despu\'es de 2008 ninguna direcci\'on es significativa al 5\%: la tasa la manejan las compras de la Fed.
 
-\Q{¿Esto invalida que la tasa sea la causa?}{No invalida el mecanismo, pero s\'i el supuesto de exogeneidad estricta que pide la funci\'on de transferencia (``X ex\'ogena, sin retroalimentaci\'on'', segunda parte). Las salidas son: (i)~restringirse a 1986--2007, donde la direcci\'on tasa $\to$ inicios es la significativa; (ii)~usar como causa el bono a 10 a\~nos, que depende menos de la vivienda. Es la limitaci\'on principal del par, y la digo yo antes de que me la pregunten.}
+\Q{¿Esto invalida que la tasa sea la causa?}{No invalida el mecanismo, pero s\'i el supuesto de exogeneidad estricta que pide la funci\'on de transferencia (``X ex\'ogena, sin retroalimentaci\'on'', segunda parte). Las salidas son: (i)~un VAR, que trata a las dos como end\'ogenas; (ii)~usar como causa el bono a 10 a\~nos, que depende menos de la vivienda. Es la limitaci\'on principal del par, y la digo yo antes de que me la pregunten.}
 
 \subsection{Rezagos distribuidos con el mismo filtro}
 \textbf{El argumento.} Si la relaci\'on verdadera es $x_t=v(B)y_t+n_t$, como $F(B)$ y $v(B)$ son polinomios en $B$, conmutan:
@@ -365,7 +365,7 @@ Modelo de la tasa: $\hat\theta$ / $\hat\sigma$ & $\ThetaT$ / $\SigmaT\%$ \\
 SBC: F3 le gana a F2 / F1 por & $\FiltroDSBCdos$ / $\FiltroDSBCuno$ puntos \\
 Pron\'ostico: mejora sobre el paseo aleatorio estacional ($h$=1/3/6/12) & $\MejoraUno$/$\MejoraTres$/$\MejoraSeis$/$\MejoraDoce\%$ \\
 Regresi\'on en niveles: pendiente / $R^2$ / $d_W$ & $\NivPend$ / $\NivR$ / $\NivDW$ \\
-Haugh $M=6$ / solo $k\ge0$ / solo $k<0$ & $\HaughSeisP$ / $\HaughDocePos$ / $\HaughDoceNeg$ \\
+Haugh $M=6$ / solo $k>0$ / solo $k<0$ & $\HaughSeisP$ / $\HaughDocePos$ / $\HaughDoceNeg$ \\
 Elasticidad a 12 meses (ee) & $\ElasDoce$ ($\ElasDoceee$) \\
 Efecto de +1 pp a 12 meses (IC 95\%) & $\PPDoce\%$ ($[\PPDoceLo;\PPDoceHi]\%$) \\
 \bottomrule
