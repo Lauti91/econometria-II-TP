@@ -11,3 +11,6 @@
 *.toc
 # Intermedios que se regeneran al correr los scripts
 *.rds
+
+# Guias de estudio: solo en el chat, nunca en el repositorio
+viviendas_tasa/informe/guia_*
