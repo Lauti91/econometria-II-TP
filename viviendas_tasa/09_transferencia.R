@@ -45,8 +45,9 @@ preblanqueo <- function(X) {
     ts(as.numeric(z), start = start(X), frequency = S) }
   a <- filtro(X); b <- filtro(Ylimpia)
   ok <- !is.na(a) & !is.na(b) & seq_along(a) > 12                       # descarta el arranque del filtro (condicion inicial 0)
-  a <- a[ok]; b <- b[ok]
-  r <- ccf(b, a, lag.max = K, plot = FALSE)                                # r(k) = corr(beta_{t+k}, alfa_t): k > 0, el input anticipa
+  a <- ts(a[ok], start = time(X)[which(ok)[1]], frequency = S); b <- b[ok]   # alfa como ts: conserva las fechas
+  stopifnot(all(diff(which(ok)) == 1))                                     # tramo contiguo
+  r <- ccf(b, as.numeric(a), lag.max = K, plot = FALSE)                                # r(k) = corr(beta_{t+k}, alfa_t): k > 0, el input anticipa
   C <- data.frame(k = as.numeric(r$lag), r = as.numeric(r$acf)); C$sig <- abs(C$r) > banda
   C$v <- ifelse(C$k >= 0, sd(b) / sd(a) * C$r, NA)                         # pesos de respuesta al impulso (apunte p. 19)
   Qk <- function(lados, M = 12) { d <- C[if (lados == "pos") C$k >= 0 & C$k <= M else C$k < 0 & C$k >= -M, ]
@@ -70,6 +71,21 @@ estimar <- function(X, b, s, r, phi, ruido) {
   xr <- cbind(regresores(X, b, s, if (r == 1) phi else 0), TCm)[INI:length(Y), , drop = FALSE]
   W <- ts(as.numeric(Y)[INI:length(Y)], start = time(Y)[INI], frequency = S)
   ajustar(W, ruido[1], ruido[2], ruido[3], ruido[4], xr, TRUE)
+}
+# Error estandar de la ganancia g = sum(delta) / (1 - phi) contando la incertidumbre de phi.
+# phi se elige por perfil de verosimilitud (arima no lo estima), asi que var.coef solo da Var(delta | phi).
+# Con un perfil aproximadamente cuadratico: Var(phi) = -1 / l''(phi); la pendiente del camino delta_hat(phi)
+# da Cov(delta, phi) = pend * Var(phi), y Var(delta) = Var(delta | phi) + pend^2 Var(phi). Despues, metodo delta.
+ee_ganancia <- function(ajuste_phi, phi, nd, h = 0.02) {
+  M <- lapply(c(phi - h, phi, phi + h), ajuste_phi)
+  if (any(sapply(M, is.null))) return(c(ee = NA, ee_cond = NA, ee_phi = NA))
+  ll <- sapply(M, function(m) as.numeric(logLik(m))); d <- sapply(M, function(m) sum(m$coef[nd]))
+  curv <- (ll[3] - 2 * ll[2] + ll[1]) / h^2; v_cond <- sum(M[[2]]$var.coef[nd, nd])
+  if (curv >= 0) return(c(ee = NA, ee_cond = sqrt(v_cond) / (1 - phi), ee_phi = NA))
+  v_phi <- -1 / curv; pend <- (d[3] - d[1]) / (2 * h)
+  V <- matrix(c(v_cond + pend^2 * v_phi, pend * v_phi, pend * v_phi, v_phi), 2)
+  gr <- c(1 / (1 - phi), d[2] / (1 - phi)^2)
+  c(ee = sqrt(drop(t(gr) %*% V %*% gr)), ee_cond = sqrt(v_cond) / (1 - phi), ee_phi = sqrt(v_phi))
 }
 grilla_phi <- seq(-0.8, 0.8, by = 0.2)                                     # grilla gruesa; despues se refina
 seleccion <- function(X) {
@@ -110,9 +126,14 @@ ajuste_final <- function(X, nombre) {
   dl <- m$coef[sprintf("D%d", g$b:(g$b + g$s))]; V <- m$var.coef[names(dl), names(dl)]
   vj <- sapply(0:K, function(j) { if (j < g$b) return(0); sum(sapply(g$b:min(j, g$b + g$s), function(i) dl[sprintf("D%d", i)] * (if (g$r == 1) g$phi^(j - i) else as.numeric(j == i)))) })
   gan <- sum(dl) / (1 - (if (g$r == 1) g$phi else 0)); gan_ee <- sqrt(sum(V)) / (1 - (if (g$r == 1) g$phi else 0))
+  gan_ee_cond <- gan_ee; phi_ee <- NA
+  if (g$r == 1) {                                                          # ee que incorpora la incertidumbre de phi
+    E <- ee_ganancia(function(ph) ajustar(W, ru[1], ru[2], ru[3], ru[4], cbind(regresores(X, g$b, g$s, ph), TCm)[INI:length(Y), , drop = FALSE], TRUE),
+                     g$phi, names(dl))
+    if (!is.na(E["ee"])) { gan_ee <- unname(E["ee"]); phi_ee <- unname(E["ee_phi"]) } else warning("perfil de phi no concavo: ee condicional") }
   D <- diagnostico(m, sum(ru))
   vj <- unname(vj)
-  list(G = G, g = g, ruido = R$modelo[1], m = m, W = W, D = D, vj = vj, gan = gan, gan_ee = gan_ee, CE = CE,
+  list(G = G, g = g, ruido = R$modelo[1], m = m, W = W, D = D, vj = vj, gan = gan, gan_ee = gan_ee, gan_ee_cond = gan_ee_cond, phi_ee = phi_ee, CE = CE,
        p_cc_pos = Qe(TRUE), p_cc_neg = Qe(FALSE), dSBC_nulo = BIC(m) - SBC_nulo)
 }
 TF <- lapply(setNames(names(ENT), names(ENT)), function(e) ajuste_final(ENT[[e]], e))
@@ -132,7 +153,8 @@ for (e in names(TF)) { t <- TF[[e]]; P <- PB[[e]]; s <- tools::toTitleCase(e)
   guardar_valor(paste0("TF", s, "Gan"), num(t$gan, 2)); guardar_valor(paste0("TF", s, "GanEE"), num(t$gan_ee, 2)); guardar_valor(paste0("TF", s, "PP"), num(t$gan * pp[e], 1))
   guardar_valor(paste0("TF", s, "Esp"), sprintf("$b=%d$, $s=%d$, $r=%d$", t$g$b, t$g$s, t$g$r)); guardar_valor(paste0("TF", s, "DSBC"), num(t$dSBC_nulo, 1))
   guardar_valor(paste0("TF", s, "Sig"), { c_ <- P$C[P$C$sig, ]; if (nrow(c_)) paste(sprintf("$k=%d$ (%s)", c_$k, num(c_$r, 2)), collapse = ", ") else "ninguno" })
-  guardar_valor(paste0("TF", s, "CCneg"), pval(t$p_cc_neg)) }
+  guardar_valor(paste0("TF", s, "CCneg"), pval(t$p_cc_neg))
+  guardar_valor(paste0("TF", s, "GanEEcond"), num(t$gan_ee_cond, 2)); if (!is.na(t$phi_ee)) guardar_valor(paste0("TF", s, "PhiEE"), num(t$phi_ee, 2)) }
 guardar_valor("TFBanda", num(banda, 3)); guardar_valor("TFRuidoUni", RY$modelo[1]); guardar_valor("TFdeltaTC", num(I8$delta, 2))
 G <- head(TF$tasa$G, 6)
 tabla_tex(data.frame(G$b, G$s, G$r, ifelse(G$r == 1, num(G$phi, 1), "--"), num(G$SBC, 1), num(G$dSBC, 1)), "09_seleccion_tasa.tex", rojo = celdas(1, 1:6), "cccccc",
@@ -148,7 +170,10 @@ W_t <- ts(as.numeric(Y)[INI:length(Y)], start = time(Y)[INI], frequency = S)
 ruidos <- list(c(1, 2, 1, 1), c(0, 1, 1, 1), c(0, 1, 0, 1), c(1, 1, 1, 1), c(0, 2, 1, 1), c(1, 0, 1, 1))
 RB <- do.call(rbind, lapply(ruidos, function(o) { m <- ajustar(W_t, o[1], o[2], o[3], o[4], xr_t, TRUE); if (is.null(m)) return(NULL)
   dl <- m$coef[sprintf("D%d", gt$b:(gt$b + gt$s))]; den <- 1 - (if (gt$r == 1) gt$phi else 0)
-  data.frame(ruido = etiqueta_modelo(o[1], o[2], o[3], o[4]), gan = sum(dl) / den, ee = sqrt(sum(m$var.coef[names(dl), names(dl)])) / den,
+  ee <- if (gt$r == 1) ee_ganancia(function(ph) ajustar(W_t, o[1], o[2], o[3], o[4], cbind(regresores(ENT$tasa, gt$b, gt$s, ph), TCm)[INI:length(Y), , drop = FALSE], TRUE),
+                                   gt$phi, names(dl))["ee"] else NA
+  if (is.na(ee)) ee <- sqrt(sum(m$var.coef[names(dl), names(dl)])) / den
+  data.frame(ruido = etiqueta_modelo(o[1], o[2], o[3], o[4]), gan = sum(dl) / den, ee = unname(ee),
              SBC = BIC(m), LB24 = diagnostico(m, sum(o))$LB24) }))
 RB$dSBC <- RB$SBC - min(RB$SBC)
 tabla_tex(data.frame(RB$ruido, sprintf("%s (%s)", num(RB$gan, 2), num(RB$ee, 2)), num(RB$gan * pp["tasa"], 1), num(RB$LB24, 3), num(RB$dSBC, 1)),
