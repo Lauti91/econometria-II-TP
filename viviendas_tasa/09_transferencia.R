@@ -159,8 +159,14 @@ guardar_valor("TFTasaPhi", num(gt$phi, 2)); print(RB)
 
 # ---- Salidas EViews ---------------------------------------------------------------------------------
 for (e in names(TF)) { t <- TF[[e]]
-  guardar_salida(salida_arma(t$m, t$W, "D(LHOUST_SA)", sprintf("Funcion de transferencia: %s -> inicios (%s)", if (e == "tasa") "D(LMORT)" else "D(LGS10)", gsub("\\\\ensuremath\\{_\\{12\\}\\}", "_12", t$ruido))),
-                 sprintf("09_modelo_%s.png", e)) }
+  guardar_salida(salida_arma(t$m, t$W, "D(LHOUST_SA)", sprintf("Funcion de transferencia: %s -> inicios", if (e == "tasa") "D(LMORT)" else "D(LGS10)")),
+                 sprintf("09_modelo_%s.png", e))
+  k_ru <- sum(grepl("^(ar|ma|sar|sma)[0-9]", names(t$m$coef)))             # parametros del ruido, para los gl del Q
+  guardar_salida(salida_correlograma(residuals(t$m), sprintf("Residuos de la funcion de transferencia (%s)", e), 36, k_ru, rojo_k = c(12, 24, 36)),
+                 sprintf("09_corr_residuos_%s.png", e)) }
+# Correlograma del input preblanqueado: tiene que ser ruido blanco (paso 1 del apunte)
+for (e in names(PB)) guardar_salida(salida_correlograma(PB[[e]]$alfa, sprintf("Correlograma de alfa: %s preblanqueada", if (e == "tasa") "tasa" else "bono"), 24,
+                                                        sum(grepl("^(ar|ma)[0-9]", names(PB[[e]]$mX$coef))), rojo_k = c(12, 24)), sprintf("09_corr_alfa_%s.png", e))
 
 # ---- Figura: FCC de los preblanqueados y pesos v_j ---------------------------------------------------
 FC <- do.call(rbind, lapply(names(PB), function(e) transform(PB[[e]]$C, input = unname(c(tasa = "Tasa hipotecaria", bono = "Bono 10 anios")[e]))))

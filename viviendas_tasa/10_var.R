@@ -71,7 +71,9 @@ for (i in 1:nk) { D <- data.frame(y = Ymat[V$idx, i], V$Z[, -1]); m <- lm(y ~ .,
   nm <- c(COVID = "COVID_TC", setNames(sprintf("%s(-%s)", sub("_[0-9]+$", "", colnames(V$Z)[-(1:2)]), sub("^.*_", "", colnames(V$Z)[-(1:2)])), colnames(V$Z)[-(1:2)]))
   otra <- nomb[-i]; guardar_salida(salida_mco(m, nomb[i], sprintf("VAR(%d), ecuacion de %s", p, nomb[i]), muestra, nombres = nm,
                                                rojo_var = nm[grepl(paste0("^", otra, "_"), names(nm))], rojo_stats = c("Durbin-Watson stat")),
-                                   sprintf("10_ecuacion_%s.png", tolower(nomb[i])), 7.4) }
+                                   sprintf("10_ecuacion_%s.png", tolower(nomb[i])), 7.4)
+  guardar_salida(salida_correlograma(ts(residuals(m), start = time(X)[V$idx[1]], frequency = S), sprintf("Residuos del VAR(%d): ecuacion de %s", p, nomb[i]), 36, rojo_k = c(12, 24, 36)),
+                 sprintf("10_corr_residuos_%s.png", tolower(nomb[i]))) }
 
 # ---- 3. Sigma, correlacion de residuos y estabilidad ----------------------------------------------------
 Sg <- V$Sigma; rho_e <- Sg[1, 2] / sqrt(Sg[1, 1] * Sg[2, 2]); t_rho <- rho_e * sqrt(Te - 2) / sqrt(1 - rho_e^2)

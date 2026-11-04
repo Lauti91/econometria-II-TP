@@ -112,11 +112,11 @@ $y$ & $\rho_1=\RhoTasaNivUno$, decae lineal & ra\'iz unitaria \\
 
 \subsection{Dickey--Fuller aumentado}
 Esquema descendente (Dickey--Pantula): primero $\Delta$, despu\'es el nivel ($\tau_\tau$, y $\tau_\mu$ si la tendencia no es significativa). 12 rezagos; sensibilidad con 24 y con SBC. $p$-valores de MacKinnon.
-\tabla{03_adf.tex}{ADF, 1985--2026. Decisi\'on con 12 rezagos, al 5\%.}{tab:adf}
+\tabla{03_adf.tex}{ADF, 1985--2026. Decisi\'on con 12 rezagos, al 5\%; ``Fr\'agil'': cambia seg\'un los rezagos (12, 24 o SBC).}{tab:adf}
 \begin{itemize}
 \item \textbf{Ambas series $I(1)$:} se rechaza sobre la diferencia ($\AdfVivDif$, $\AdfTasaDif$) y no sobre el nivel ($\tau_\mu=\AdfVivNivTM$ y $\AdfTasaNivTM$; VC $\AdfVCtm$).
 \item \textbf{El ADF no detecta la ra\'iz estacional} (solo testea $z=1$, \nota{6}{2.3}): la decide el correlograma.
-\item \textbf{Sobre $(1-B^{12})x$ el ADF es fr\'agil:} $p=\AdfVivEstp$ con 12 rezagos, $p=\AdfVivEstSBCpv$ con SBC. Se aplica $(1-B)$: manda el correlograma (regla 6).
+\item \textbf{Sobre $(1-B^{12})x$ el ADF es fr\'agil:} $p=\AdfVivEstp$ con 12 rezagos, $p=\AdfVivEstSBCpv$ con SBC. Con un MA estacional fuerte, el ADF con pocos rezagos sobrerrechaza (Schwert, 1989). Se aplica $(1-B)$: manda el correlograma (regla 6).
 \end{itemize}
 \salida{03_adf_lhoust.png}{0.6}{ADF del nivel de los inicios. Resto en el Ap\'endice~A.}
 
@@ -266,6 +266,10 @@ $F(B)=(1-B)(1-B^{12})$ en ambas series: $F(B)x_t=v(B)F(B)y_t+F(B)n_t$, con $v(B)
 \includegraphics[width=0.49\linewidth]{03_corr_dlhoust.png}\hfill
 \includegraphics[width=0.49\linewidth]{04_corr_sa.png}
 \caption{Correlogramas de $(1-B)x$ (picos estacionales que no decaen) y de la serie desestacionalizada en diferencia.}
+\end{figure}
+\begin{figure}[H]\centering
+\includegraphics[width=0.49\linewidth]{03_corr_d12lhoust.png}
+\caption{Correlograma de $(1-B^{12})x$: FAC gruesa ($\rho_1=\RhoFdosUno$), le falta la diferencia regular.}
 \end{figure}
 \salida{04_modelo_sa.png}{0.8}{Modelo de la serie desestacionalizada (comparaci\'on, regla 8).}
 

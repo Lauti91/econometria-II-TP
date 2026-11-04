@@ -199,12 +199,12 @@ dw <- function(e) sum(diff(e)^2) / sum(e^2)
 # Motor de dibujo: tabla de texto con lineas, al estilo de la ventana de EViews
 dibujar <- function(titulo, cabecera, tab, izq, der, extra = NULL, previo = NULL, rojo_tab = NULL, rojo_stats = NULL, rojo_previo = FALSE) {
   if (is.null(rojo_tab)) rojo_tab <- rep(FALSE, nrow(tab))
-  fuente <- "Liberation Sans"; serif <- "Latin Modern Roman"; tam <- 3.15
+  fuente <- "Liberation Sans"; serif <- "Latin Modern Roman"; tam <- 4.0   # letra de la tabla (antes 3,15)
   el <- list(); seg <- list(); y <- 0
   add <- function(x, y, lab, h = 0.5, face = "plain", fam = fuente, s = tam, col = tinta)
     el[[length(el) + 1]] <<- data.frame(x = x, y = y, lab = lab, h = h, face = face, fam = fam, s = s, col = col)
   linea <- function(y) seg[[length(seg) + 1]] <<- data.frame(x = 0.5, xend = 99.5, y = y, yend = y)
-  add(50, y, titulo, 0.5, "bold", serif, 5.0); y <- y - 2.1; y_top <- y + 0.65
+  add(50, y, titulo, 0.5, "bold", serif, 5.6); y <- y - 2.1; y_top <- y + 0.65
   for (ln in cabecera) { add(2, y, ln, 0); y <- y - 1 }
   if (!is.null(previo)) {
     y <- y - 0.2; linea(y + 0.55)
@@ -298,7 +298,7 @@ salida_adf <- function(A, titulo) {
 # Correlograma con el formato de EViews: barras de FAC y FACP, AC, PAC, Q-Stat y Prob
 salida_correlograma <- function(z, titulo, K = 24, k = 0, sub = NULL, rojo_k = NULL) {
   C <- correlograma(z, K, k); b <- C$banda[1]; n <- C$n[1]
-  fuente <- "Liberation Mono"; tam <- 2.9
+  fuente <- "Liberation Mono"; tam <- 3.7   # letra de los numeros (antes 2,9)
   y <- -(1:K)                                                     # una fila por rezago
   x_ac <- 12; x_pac <- 33; w <- 10.5                              # centro y semiancho de cada panel de barras
   bar <- function(x0, r) data.frame(xmin = pmin(x0, x0 + r * w), xmax = pmax(x0, x0 + r * w), ymin = y - 0.32, ymax = y + 0.32,
@@ -309,14 +309,14 @@ salida_correlograma <- function(z, titulo, K = 24, k = 0, sub = NULL, rojo_k = N
   txt$col <- ifelse(C$k %in% rojo_k, rojo, tinta); txt$ff <- ifelse(C$k %in% rojo_k, "bold", "plain")
   p <- ggplot() +
     annotate("rect", xmin = 0.5, xmax = 99.5, ymin = -K - 0.9, ymax = 3.6, fill = "white", colour = "#6B7480", linewidth = 0.4) +
-    annotate("text", x = 50, y = 5.2, label = titulo, family = "Latin Modern Roman", fontface = "bold", size = 5.0, colour = tinta) +
-    annotate("text", x = 2, y = 2.6, hjust = 0, size = 3.1, family = "Liberation Sans", colour = tinta,
+    annotate("text", x = 50, y = 5.2, label = titulo, family = "Latin Modern Roman", fontface = "bold", size = 5.6, colour = tinta) +
+    annotate("text", x = 2, y = 2.6, hjust = 0, size = 3.6, family = "Liberation Sans", colour = tinta,
              label = sprintf("Sample: %s   Included observations: %d%s", paste(range(em(z)), collapse = " "), n,
                              if (k > 0) sprintf("   Q-statistic probabilities adjusted for %d ARMA term(s)", k) else "")) +
     annotate("segment", x = 0.5, xend = 99.5, y = 1.9, yend = 1.9, colour = "#6B7480", linewidth = 0.3) +
     annotate("segment", x = 0.5, xend = 99.5, y = 0.45, yend = 0.45, colour = "#6B7480", linewidth = 0.3) +
-    annotate("text", x = c(x_ac, x_pac), y = 1.15, label = c("Autocorrelation", "Partial Correlation"), size = 3.0, family = "Liberation Sans", fontface = "bold", colour = tinta) +
-    annotate("text", x = c(47, 60, 73, 86, 97), y = 1.15, label = c("k", "AC", "PAC", "Q-Stat", "Prob"), hjust = 1, size = 3.0,
+    annotate("text", x = c(x_ac, x_pac), y = 1.15, label = c("Autocorrelation", "Partial Correlation"), size = 3.8, family = "Liberation Sans", fontface = "bold", colour = tinta) +
+    annotate("text", x = c(47, 60, 73, 86, 97), y = 1.15, label = c("k", "AC", "PAC", "Q-Stat", "Prob"), hjust = 1, size = 3.8,
              family = "Liberation Sans", fontface = "bold", colour = tinta) +
     annotate("segment", x = c(x_ac, x_pac), xend = c(x_ac, x_pac), y = 0.3, yend = -K - 0.6, colour = tinta2, linewidth = 0.3) +
     annotate("segment", x = c(x_ac - b * w, x_ac + b * w, x_pac - b * w, x_pac + b * w), xend = c(x_ac - b * w, x_ac + b * w, x_pac - b * w, x_pac + b * w),
@@ -330,7 +330,7 @@ salida_correlograma <- function(z, titulo, K = 24, k = 0, sub = NULL, rojo_k = N
     geom_text(data = txt, aes(x = 97, y = y, label = p, fontface = ff), hjust = 1, size = tam, family = fuente, colour = txt$col) +
     scale_x_continuous(limits = c(0, 100), expand = c(0, 0)) + scale_y_continuous(limits = c(-K - 1.4, 6.3), expand = c(0, 0)) +
     theme_void() + theme(plot.background = element_rect(fill = "white", colour = NA))
-  if (!is.null(sub)) p <- p + annotate("text", x = 2, y = -K - 1.15, hjust = 0, vjust = 1, size = 2.7, family = "Liberation Sans", colour = tinta2, label = sub)
+  if (!is.null(sub)) p <- p + annotate("text", x = 2, y = -K - 1.15, hjust = 0, vjust = 1, size = 3.4, family = "Liberation Sans", colour = tinta2, label = sub)
   attr(p, "alto") <- (K + 7.7) * 0.205
   p
 }

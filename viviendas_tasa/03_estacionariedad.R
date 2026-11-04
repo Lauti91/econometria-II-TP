@@ -35,10 +35,11 @@ g <- ggplot(CR, aes(k, r)) +
                strip.text.x = element_text(colour = tinta, face = "bold"))
 guardar_fig(g, "03_correlogramas.png", 11, 10)
 
-# Salidas tipo EViews (24 rezagos) de las cinco series clave
+# Salidas tipo EViews (24 rezagos) de las seis series clave
 corr_ev <- list(
   list(viv, "Correlograma de LHOUST (nivel)", "03_corr_lhoust.png", c(1, 12, 24)),
   list(diff(viv), "Correlograma de D(LHOUST)", "03_corr_dlhoust.png", c(12, 24)),
+  list(diff(viv, 12), "Correlograma de D(LHOUST,0,12)", "03_corr_d12lhoust.png", 1:3),
   list(diff(diff(viv, 12)), "Correlograma de D(LHOUST,1,12)", "03_corr_d112lhoust.png", c(1, 11, 12, 13)),
   list(tasa, "Correlograma de LMORT (nivel)", "03_corr_lmort.png", c(1, 24)),
   list(diff(tasa), "Correlograma de D(LMORT)", "03_corr_dlmort.png", 1))
@@ -80,7 +81,11 @@ AD <- do.call(rbind, lapply(pruebas, function(P) {
 write.csv(AD, "salidas/tablas/03_adf.csv", row.names = FALSE)
 print(transform(AD[, -1], tau12 = round(tau12, 2), p12 = round(p12, 3), tau24 = round(tau24, 2), p24 = round(p24, 3), tau_sbc = round(tau_sbc, 2), psbc = round(psbc, 3), t_tend = round(t_tend, 2)))
 dec <- function(p) ifelse(p < 0.05, "Rechaza", "No rechaza")
-tabla_tex(data.frame(AD$serie, AD$paso, AD$n, num(AD$tau12, 2), num(AD$vc5, 2), sapply(AD$p12, pval), dec(AD$p12),
+# Si la decision al 5% cambia segun los rezagos (12, 24 o SBC), la fila se marca "Fragil" (efecto Schwert:
+# con MA fuertes el ADF con pocos rezagos sobrerrechaza; ver (1-B^12)x)
+fragil <- dec(AD$p12) != dec(AD$p24) | dec(AD$p12) != dec(AD$psbc)
+decision <- ifelse(fragil, "Fr\\'agil", dec(AD$p12))
+tabla_tex(data.frame(AD$serie, AD$paso, AD$n, num(AD$tau12, 2), num(AD$vc5, 2), sapply(AD$p12, pval), decision,
                      num(AD$tau24, 2), sprintf("%s (%d)", num(AD$tau_sbc, 2), AD$p_sbc)),
           "03_adf.tex", rojo = rbind(celdas(1:7, 7), celdas(4, 9)), "llccccccc",
           c("Serie", "Contraste", "$n$", "$\\tau$ (12 rez.)", "VC 5\\%", "$p$", "Decisi\\'on", "$\\tau$ (24 rez.)", "$\\tau$ (SBC, $p$)"))

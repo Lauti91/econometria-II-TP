@@ -65,6 +65,16 @@ r_g <- resp[resp$forma == gana, ]
 guardar_valor("IntImpactoPct", num(r_g$pct[1], 1))
 guardar_valor("IntTresPct", num(r_g$pct[r_g$j == 3], 1)); guardar_valor("IntSeisPct", num(r_g$pct[r_g$j == 6], 1))
 if (gana == "TC") guardar_valor("IntVidaMedia", num(log(0.5) / log(delta), 1))   # meses hasta que el efecto cae a la mitad
+# Trayectoria de la forma elegida en meses clave y perdida acumulada (suma de las caidas proporcionales,
+# en meses de inicios: -1 = se perdio el equivalente a un mes entero)
+jj <- c(0, 1, 2, 3, 6, 12); tr <- r_g[match(jj, r_g$j), ]
+om_g <- COMP$omega[COMP$forma == gana]
+xi_g <- switch(gana, AO = as.numeric(0:600 == 0), TC = delta^(0:600), LS = rep(1, 601))
+perdida <- sum(exp(om_g * xi_g / 100) - 1)                       # en LS no converge: se informa solo si es AO o TC
+mes_tr <- sprintf("%d-%02d", 2020 + (3 + jj) %/% 12, (3 + jj) %% 12 + 1)
+tabla_tex(data.frame(jj, mes_tr, num(tr$efecto, 1), num(tr$pct, 1)), "08_trayectoria.tex", rojo = celdas(1, 4), "cccc",
+          c("Meses desde el impacto ($j$)", "Mes", "Efecto en el nivel, $\\hat\\omega\\,\\xi_j$ ($100\\ln$)", "Efecto en \\% de inicios"))
+if (gana != "LS") guardar_valor("IntPerdidaMeses", num(perdida, 2))
 etq <- c(AO = "Pulso (AO)", TC = sprintf("Transitorio (TC, delta = %.2f)", delta), LS = "Escalon (LS)")
 g1 <- ggplot(resp, aes(j, pct, colour = forma == gana, group = forma)) + geom_hline(yintercept = 0, colour = tinta2, linewidth = 0.3) +
   geom_line(linewidth = 0.8) + geom_point(size = 1.2) +
