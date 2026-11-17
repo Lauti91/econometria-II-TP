@@ -1,0 +1,289 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{float}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{tcolorbox}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=blue!50!black]{hyperref}
+\setlength{\parskip}{4pt}\setlength{\parindent}{0pt}
+\setlist{itemsep=1pt,topsep=3pt}
+\renewcommand{\arraystretch}{1.12}
+\newcommand{\R}{../salidas}
+\graphicspath{{\R/figuras/}{\R/eviews/}}
+\input{\R/tablas/valores_02.tex}\input{\R/tablas/valores_03.tex}\input{\R/tablas/valores_04.tex}\input{\R/tablas/valores_05.tex}
+\input{\R/tablas/valores_06.tex}\input{\R/tablas/valores_07.tex}\input{\R/tablas/valores_08.tex}\input{\R/tablas/valores_09.tex}\input{\R/tablas/valores_10.tex}
+\newcommand{\tabla}[2]{\begin{table}[H]\centering\small\begin{adjustbox}{max width=\linewidth}\input{\R/tablas/#1}\end{adjustbox}\caption{#2}\end{table}}
+\newcommand{\dos}[3]{\begin{figure}[H]\centering\includegraphics[width=0.49\linewidth]{#1}\hfill\includegraphics[width=0.49\linewidth]{#2}\caption{#3}\end{figure}}
+\newcommand{\salida}[3]{\begin{figure}[H]\centering\includegraphics[width=#2\linewidth]{#1}\caption{#3}\end{figure}}
+\newtcolorbox{revisar}{colback=red!4,colframe=red!55!black,boxrule=0.5pt,arc=1pt,left=5pt,right=5pt,top=3pt,bottom=3pt,fonttitle=\bfseries\small,title=Para revisar}
+\newcommand{\Q}[1]{\item #1}
+
+\title{\textbf{Inicios de viviendas y tasa hipotecaria en EE.UU.}\\[3pt]
+\large Trabajo pr\'actico de Econometr\'ia II}
+\author{}
+\date{}
+
+\begin{document}\sloppy
+\maketitle
+
+\section*{Resumen}
+\begin{itemize}
+\item \textbf{Pregunta.} ¿Cu\'anto y con qu\'e rezago caen los inicios de viviendas en EE.UU.\ cuando sube la tasa hipotecaria? ¿Es la tasa ex\'ogena?
+\item \textbf{Primera parte.} Inicios: $(1-B)(1-B^{12})$ y ARIMA$(0,1,1)(0,1,1)_{12}$. Tasa: $(1-B)$ y ARIMA$(0,1,1)$. En niveles la relaci\'on es espuria.
+\item \textbf{Intervenci\'on.} El cierre por COVID (2020-04) es un cambio transitorio ($\delta=\IntDelta$).
+\item \textbf{Exogeneidad.} Domina el efecto de la tasa sobre los inicios. La retroalimentaci\'on (de los inicios hacia la tasa) no es significativa en conjunto en ning\'un chequeo de la muestra completa: la tasa se trata como ex\'ogena. El VAR, que no lo supone, detecta una respuesta de la tasa a los inicios, pero chica (3\% de su varianza).
+\item \textbf{Resultado.} Funci\'on de transferencia: los inicios responden a la tasa con dos meses de retardo y un efecto que se acumula a tasa $\phi=0{,}75$. Ganancia $\TFTasaGan$: +1\,pp de tasa reduce los inicios $\TFTasaPP\%$ (entre $\TFRobPPMin$ y $\TFRobPPMax\%$ seg\'un la especificaci\'on del ruido). El VAR da $\VARelasPPDoce\%$: el mismo resultado sin imponer exogeneidad.
+\end{itemize}
+
+%======================================================================
+\section{Objetivo y modelo econ\'omico}
+\textbf{Pregunta.} ¿Cu\'anto y con qu\'e rezago caen los inicios de construcci\'on de viviendas en EE.UU.\ cuando sube la tasa hipotecaria a 30 a\~nos? ¿Es la tasa ex\'ogena para la vivienda, o hay retroalimentaci\'on?
+
+\textbf{Modelo econ\'omico.} Los inicios son inversi\'on residencial: dependen del costo de financiamiento de los compradores (la cuota hipotecaria) y de los constructores. Una suba de la tasa encarece la cuota, baja la demanda de vivienda nueva y, con rezago de algunos meses (permisos, decisiones de obra), los inicios. A la vez, la tasa se forma en el mercado de bonos y puede reaccionar a la actividad: si la construcci\'on sorprende para arriba, el mercado y la Fed esperan m\'as actividad e inflaci\'on y la tasa sube. Esa posible retroalimentaci\'on decide la metodolog\'ia: con tasa ex\'ogena, funci\'on de transferencia; con retroalimentaci\'on, VAR.
+
+\textbf{Plan.} Parte 1: Box--Jenkins de cada serie, pron\'ostico y relaci\'on (espuria, Haugh, rezagos distribuidos). Parte 2: intervenci\'on (COVID), funci\'on de transferencia y VAR como control de robustez.
+
+%======================================================================
+\section{Datos}
+\begin{table}[H]\centering\small
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lllll}
+\toprule
+Serie & C\'odigo FRED & Unidad & Frecuencia & Uso \\
+\midrule
+Inicios de viviendas privadas & HOUSTNSA & miles de unidades, sin desestacionalizar & mensual & serie principal, $x_t=100\ln$ \\
+Inicios desestacionalizados & HOUST & miles, tasa anual SA (se divide por 12) & mensual & parte 2 (Sec.~\ref{sec:mft}) \\
+Tasa hipotecaria fija 30 a\~nos & MORTGAGE30US & \% anual & semanal $\to$ promedio mensual & causa, $y_t=100\ln$ \\
+Bono del Tesoro 10 a\~nos & GS10 & \% anual & mensual & contexto; input alternativo en Sec.~\ref{sec:mft} \\
+Recesiones NBER & USREC & indicadora & mensual & gr\'aficos \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\caption{Series. Muestra: 1985-01 a 2026-08 ($T=500$). Datos descargados de FRED el 19 de octubre de 2026.}
+\end{table}
+
+\salida{02_niveles.png}{1}{Series en niveles, 1971--2026. Gris: recesiones NBER. L\'inea roja: inicio de la muestra (1985).}
+\begin{itemize}
+\item \textbf{Muestra desde 1985} para dejar afuera el r\'egimen Volcker: en 1979--84 el desv\'io de $\Delta$tasa es $\VolVolcker$\,pp, $\VolRatio$ veces el de 1985--2007 ($\VolNormal$\,pp).
+\item \textbf{Transformaci\'on.} $100\ln$: las diferencias se leen como variaciones porcentuales y los coeficientes de relaci\'on como elasticidades. El rango--media (Box--Cox) da $\lambda\approx\LamInicios$ para inicios (IC [$\LamInicioslo$; $\LamIniciosup$]) y $\LamTasa$ para la tasa (IC incluye 0).
+\end{itemize}
+
+%======================================================================
+\section{Parte 1: cada serie}
+\subsection{Estacionalidad}
+\par Sobre $\Delta x_t$ (y $\Delta y_t$), con $D_{s,t}$ dummy del mes $s$ ($s=1,\dots,11$) y $sp_t=1$ desde 2008 (subper\'iodo):
+\begin{align*}
+m_0:&\quad \Delta x_t=\mu+\lambda\,sp_t+u_t &&\text{(2 par\'ametros)}\\
+m_1:&\quad \Delta x_t=\mu+\lambda\,sp_t+\textstyle\sum_{s=1}^{11}\gamma_sD_{s,t}+u_t &&\text{(13)}\\
+m_2:&\quad \Delta x_t=\mu+\lambda\,sp_t+\textstyle\sum_{s=1}^{11}\gamma_sD_{s,t}+\sum_{s=1}^{11}\kappa_s\,D_{s,t}\,sp_t+u_t &&\text{(24)}
+\end{align*}
+Estacionalidad fija: $m_0$ contra $m_1$, $H_0:\gamma_1=\dots=\gamma_{11}=0$, $F_{11,486}$. Cambio de patr\'on: $m_1$ contra $m_2$, $H_0:\kappa_1=\dots=\kappa_{11}=0$, $F_{11,475}$.
+\tabla{02_estacionalidad.tex}{$\Delta$ de cada serie sobre 11 dummies mensuales centradas, y prueba de cambio de patr\'on (mes $\times$ subper\'iodo).}
+\salida{02_estacionalidad.png}{0.85}{Variaci\'on mensual promedio de $100\ln$(inicios) por subper\'iodo: el patr\'on es el mismo (picos en marzo, pozos en noviembre y diciembre) pero la amplitud se achica despu\'es de 2008.}
+\par Inicios: estacionalidad fuerte ($F=\EstFv$) y patr\'on que cambia entre 1985--2007 y 2008--2026 ($F=\EstFcv$, $p\ \EstPcv$): la estacionalidad es estoc\'astica y se modela con $(1-B^{12})$. Tasa: sin estacionalidad ($F=\EstFt$, $p=\EstPt$).
+
+\subsection{Estacionariedad}
+\salida{03_correlogramas.png}{0.97}{FAC y FACP por filtro (banda $\pm1{,}96/\sqrt T$).}
+\dos{03_corr_lhoust.png}{03_corr_dlhoust.png}{Correlogramas de los inicios: nivel (ca\'ida lenta) y $(1-B)x$ (picos en 12, 24 y 36 que no decaen).}
+\dos{03_corr_d12lhoust.png}{03_corr_d112lhoust.png}{Correlogramas de $(1-B^{12})x$ (FAC gruesa: falta la diferencia regular) y de $(1-B)(1-B^{12})x$ (estacionaria; picos en 1, 11, 12 y 13).}
+\dos{03_corr_lmort.png}{03_corr_dlmort.png}{Correlogramas de la tasa: nivel (ra\'iz unitaria) y $(1-B)y$ (estacionaria, firma de MA(1)).}
+\par ADF, con $p=12$ rezagos (sensibilidad con 24 y con el $p$ del SBC):
+\[\Delta x_t=\alpha+\beta t+\gamma\,x_{t-1}+\sum_{j=1}^{p}\delta_j\Delta x_{t-j}\;\Big[+\sum_{s=1}^{11}\gamma_sD_{s,t}\Big]+e_t,\qquad H_0:\gamma=0\ \ \text{vs.}\ \ H_1:\gamma<0,\]
+con tendencia ($\tau_\tau$) o sin ella ($\tau_\mu$); dummies estacionales solo para los inicios. Paso 1 (segunda ra\'iz): la misma regresi\'on con $\Delta x_t$ en lugar de $x_t$.
+\tabla{03_adf.tex}{ADF, 1985--2026; esquema descendente de Dickey--Pantula, valores $p$ de MacKinnon. ``Fr\'agil'': la decisi\'on al 5\% cambia seg\'un los rezagos (12, 24 o SBC).}
+\par Cuatro filtros rivales $F(B)$ y, sobre cada serie filtrada $W_t=F(B)x_t$, el mejor ARMA$(p,q)(P,Q)_{12}$ admisible:
+\[\phi(B)\Phi(B^{12})\,W_t=c+\theta(B)\Theta(B^{12})\,a_t,\qquad
+\begin{cases}\text{F1: }W_t=(1-B)x_t\ \ (+\ \text{11 dummies})\\ \text{F2: }W_t=(1-B^{12})x_t\ \ (+\ c)\\ \text{F2t: }W_t=(1-B^{12})x_t\ \ (+\ c+\beta t)\\ \text{F3: }W_t=(1-B)(1-B^{12})x_t\end{cases}\]
+\tabla{04_filtros.tex}{Filtros rivales comparados por SBC sobre las mismas fechas (todo filtro tiene $F(0)=1$: jacobiano unitario).}
+\par Niveles: FAC lenta ($\rho_1=\RhoNivUno$ inicios, $\RhoTasaNivUno$ tasa) y ADF no rechaza ($p=\AdfVivNivTTp$ y $\AdfTasaNivTTp$ con tendencia). En diferencias, ambos rechazan. Para inicios gana por SBC $(1-B)(1-B^{12})$ (F3) frente a $(1-B)$ + dummies ($\Delta$SBC $=\FiltroDSBCuno$) y frente a $(1-B^{12})$ ($\Delta$SBC $=\FiltroDSBCdos$, con ra\'iz AR casi unitaria $\FiltroDosRaizAR$). Sobre $(1-B^{12})x$ el ADF es fr\'agil: rechaza con 12 rezagos ($p=\AdfVivEstp$) y no con los $\AdfVivEstSBCp$ del SBC ($p=\AdfVivEstSBCpv$). Con un MA estacional fuerte, el ADF con pocos rezagos sobrerrechaza (Schwert, 1989); manda el correlograma.
+
+\subsection{Inicios: ARIMA$(0,1,1)(0,1,1)_{12}$}
+\par Sobre $W_t=(1-B)(1-B^{12})x_t$ se estima la rejilla $\phi_p(B)\Phi_P(B^{12})W_t=\theta_q(B)\Theta_Q(B^{12})a_t+\omega\,(1-B)(1-B^{12})Z_t$, con $p\le3$, $q\le2$, $P\le1$, $Q\le1$ y $Z_t$ pulso en 2020-04. El modelo elegido (l\'ineas a\'ereas):
+\[(1-B)(1-B^{12})\,x_t=(1-\theta B)(1-\Theta B^{12})\,a_t+\omega\,(1-B)(1-B^{12})Z_t,\qquad a_t\sim RB(0,\sigma^2).\]
+\tabla{04_rejilla.tex}{Rejilla ARMA$(p\le3,q\le2)(P\le1,Q\le1)_{12}$ sobre F3: los ocho de menor SBC ($\RejillaAdm$ admisibles de $\RejillaN$).}
+\salida{04_modelo_inicios.png}{0.8}{Modelo de l\'ineas a\'ereas con at\'ipico aditivo en 2020-04 (signo de R).}
+\salida{04_residuos.png}{1}{Residuos estandarizados, FAC y Q--Q.}
+\salida{04_corr_residuos.png}{0.6}{Correlograma de los residuos del modelo de los inicios, con $Q$ de Ljung--Box (gl ajustados por 2 par\'ametros ARMA).}
+\par $\hat\theta=\ThetaV$, $\hat\Theta=\SThetaV$ (convenci\'on $1-\theta B$), invertibles. Residuos ruido blanco (LB $p$ = $\LBVdoce$/$\LBVveinticuatro$/$\LBVtreintayseis$), normales ($JB=\JBV$, $p=\JBVp$); sin el AO, abril de 2020 queda en $\ResidAbrSinAO$ desv\'ios y $JB=\JBVsinAO$. Sobreajuste: ning\'un par\'ametro agregado tiene $|t|>\SobreMaxT$. Estable por subper\'iodos ($\hat\theta$ = $\ThetaSubUno$ y $\ThetaSubDos$; $\hat\Theta$ = $\SThetaSubUno$ y $\SThetaSubDos$). Cuadrados de los residuos: LB $p\ \LBcuadV$ (heterocedasticidad).
+
+\subsection{Tasa: ARIMA(0,1,1)}
+\par Rejilla ARMA$(p\le3,q\le2)$ sobre $(1-B)y_t$, con y sin constante. Modelo elegido:
+\[(1-B)\,y_t=(1-\theta B)\,a_t,\qquad a_t\sim RB(0,\sigma^2)\quad\text{(sin constante)}.\]
+\salida{05_modelo_tasa.png}{0.8}{Modelo de la tasa (sin constante).}
+\salida{05_corr_residuos.png}{0.6}{Correlograma de los residuos del modelo de la tasa.}
+\par $\hat\theta=\ThetaT$ (convenci\'on $1-\theta B$; en R, $+0{,}439$): MA(1) que reproduce el $\rho_1=\RhoTasaDifUno$ de $\Delta y$. Residuos sin autocorrelaci\'on (LB $p$ = $\LBTdoce$/$\LBTveinticuatro$/$\LBTtreintayseis$), pero no normales ($JB=\JBT$, curtosis $\CurtosisT$) y heteroced\'asticos (cuadrados: $p\ \LBcuadT$). At\'ipicos: \AtipicosT.
+
+\subsection{Pron\'ostico fuera de muestra}
+\par Pron\'ostico a $h$ pasos desde cada origen $T$ (24 or\'igenes entre 2018 y 2019, antes del COVID), con los modelos estimados hasta $T$; los \'ordenes se eligen solo con 1985--2017. Referentes:
+\begin{align*}\text{Ingenuo estacional:}&\quad \hat x_{T+h}=x_{T+h-12}\\ \text{Paseo aleatorio estacional, ARIMA}(0,1,0)(0,1,0)_{12}\text{:}&\quad \hat x_{T+h}=x_{T+h-12}+(x_T-x_{T-12})\end{align*}
+para la tasa, el paseo aleatorio $\hat y_{T+h}=y_T$. M\'etricas: $\text{RMSE}_h=\sqrt{\tfrac1N\sum(x_{T+h}-\hat x_{T+h})^2}$, MAPE sobre el nivel y $U$ de Theil.
+\tabla{06_metricas_inicios.tex}{Inicios, origen m\'ovil sobre 2018--2019 ($\NEval$ or\'igenes, \'ordenes elegidos con 1985--2017): RMSE, MAPE y $U$ de Theil contra el paseo aleatorio estacional.}
+\salida{06_pronostico.png}{0.8}{Arriba: pron\'osticos desde 2017-12 contra lo observado. Abajo: 12 meses desde 2026-08.}
+\emph{Paseo aleatorio estacional} = modelo de l\'ineas a\'ereas sin MA, ARIMA$(0,1,0)(0,1,0)_{12}$: $\hat x_{T+h}=x_{T+h-12}+(x_T-x_{T-12})$; el \emph{ingenuo estacional} es $x_{T+h-12}$.
+
+\par El modelo de inicios mejora al paseo aleatorio estacional en $\MejoraUno\%$ a un paso y $\MejoraDoce\%$ a doce. Para la tasa el ARIMA(0,1,1) apenas mejora al paseo aleatorio a un paso ($\MejoraTasaUno\%$) y nada a doce: esperable en un precio de mercado.
+
+%======================================================================
+\section{Parte 1: la relaci\'on}
+\subsection{Regresi\'on espuria}
+\par Tres regresiones por MCO:
+\[x_t=\alpha+\beta\,y_t+u_t;\qquad x_t=\alpha+\beta\,y_t+\textstyle\sum_{s=1}^{11}\gamma_sD_{s,t}+u_t;\qquad F(B)x_t=\alpha+\beta\,F(B)y_t+\omega\,F(B)Z_t+u_t,\]
+con $F(B)=(1-B)(1-B^{12})$. Alarma de Granger--Newbold: $R^2>d_W$.
+\tabla{07_alarma.tex}{Regresiones de $\ln$ inicios sobre $\ln$ tasa: niveles, niveles con dummies y ambas filtradas con $(1-B)(1-B^{12})$.}
+\par En niveles la pendiente es positiva y ``significativa'' ($t=\NivT$) y $d_W=\NivDW$ muy bajo. La alarma $R^2>d_W$ de Granger--Newbold no salta en la regresi\'on cruda ($\NivR<\NivDW$) porque la estacionalidad de los inicios infla la varianza no explicada; con dummies mensuales s\'i: $R^2=\DumR>d_W=\DumDW$. Regresi\'on espuria. Filtradas, el $R^2$ cae a $\FilR$ y $d_W=\FilDW$.
+
+\subsection{Correlaci\'on cruzada de innovaciones y test de Haugh}
+\par Innovaciones $\hat a^{\text{tasa}}_t$ y $\hat a^{\text{inicios}}_t$ de los modelos univariados (Secciones 3.3 y 3.4), correlaci\'on cruzada $r_k=\mathrm{corr}(\hat a^{\text{tasa}}_t,\hat a^{\text{inicios}}_{t+k})$ y test de Haugh:
+\[S_M=n\sum_{k=-M}^{M}r_k^2\ \sim\ \chi^2_{2M+1},\]
+\[S^{+}=n\sum_{k=1}^{M}r_k^2\sim\chi^2_M\ \ (\text{tasa}\to\text{inicios}),\qquad S^{-}=n\sum_{k=-M}^{-1}r_k^2\sim\chi^2_M\ \ (\text{inicios}\to\text{tasa}).\]
+\salida{07_relacion.png}{1}{Izquierda: $r_k=\mathrm{corr}(\hat a^{\text{tasa}}_t,\hat a^{\text{inicios}}_{t+k})$ de las innovaciones de los dos modelos univariados ($k>0$: la tasa anticipa). Derecha: respuesta acumulada de los rezagos distribuidos.}
+\tabla{07_haugh.tex}{Test de Haugh, $S=n\sum r_k^2\sim\chi^2$. Las dos \'ultimas columnas separan la direcci\'on ($M=12$).}
+\par No son independientes. En toda la muestra domina la direcci\'on de la tasa hacia los inicios ($k=1..12$: $p=\HaughDocePos$), con correlaciones negativas a 3, 5 y 6 meses. La direcci\'on inversa, de los inicios hacia la tasa, no es significativa en conjunto ($p=\HaughDoceNeg$) pero $r_{-1}=0{,}15$ s\'i, y en 1986--2007 la direcci\'on es significativa ($p=0{,}043$): retroalimentaci\'on de corto plazo.
+
+\subsection{Rezagos distribuidos con el mismo filtro}
+\par Con el mismo filtro $F(B)=(1-B)(1-B^{12})$ en ambas series (si $x_t=v(B)y_t+n_t$, entonces $F(B)x_t=v(B)F(B)y_t+F(B)n_t$):
+\[F(B)x_t=\alpha+\sum_{j=0}^{12}v_j\,F(B)y_{t-j}+\omega\,F(B)Z_t+u_t,\qquad \text{elasticidad acumulada a $k$ meses}=\sum_{j=0}^{k}v_j.\]
+\tabla{07_respuesta.tex}{Elasticidad acumulada de los inicios a la tasa (MCO con rezagos 0--12, ambas con $(1-B)(1-B^{12})$). Tercera columna: efecto de +1\,pp sobre la tasa de $\TasaUltima\%$ ($=+\PPequiv\%$ de la tasa).}
+\par Elasticidad a 12 meses $\ElasDoce$ (ee $\ElasDoceee$): +1\,pp de tasa implica $\PPDoce\%$ de inicios, IC [$\PPDoceLo\%$; $\PPDoceHi\%$]. Los errores est\'andar son orientativos ($d_W=\RDdw$).
+
+%======================================================================
+\section{Parte 2: an\'alisis de intervenci\'on (COVID, abril de 2020)}\label{sec:interv}
+\textbf{M\'etodo} (Enders 5.1). $x_t=\omega\,\xi(B)Z_t+N_t$, con $N_t$ el ruido ARIMA$(0,1,1)(0,1,1)_{12}$ y $Z_t$ un pulso en 2020-04. Se comparan tres formas: pulso (AO, $\xi=1$), cambio transitorio (TC, $\xi=1/(1-\delta B)$) y escal\'on (LS, $\xi=1/(1-B)$). Se estima sobre $(1-B)(1-B^{12})x$ con el regresor filtrado igual; $\delta$ por perfil de verosimilitud; la forma por SBC contando $\delta$ como par\'ametro.
+\par \[x_t=\omega\,\xi(B)Z_t+N_t,\qquad (1-B)(1-B^{12})N_t=(1-\theta B)(1-\Theta B^{12})a_t,\qquad Z_t=\begin{cases}1&t=\text{2020-04}\\0&\text{si no}\end{cases}\]
+\[\text{AO: }\xi(B)=1;\qquad\text{TC: }\xi(B)=\frac{1}{1-\delta B}\ (0<\delta<1);\qquad\text{LS: }\xi(B)=\frac{1}{1-B}.\]
+Se estima sobre $W_t=(1-B)(1-B^{12})x_t$ con el regresor filtrado igual, $(1-B)(1-B^{12})\xi(B)Z_t$. Efecto sobre el nivel $j$ meses despu\'es: $\omega$ (AO, solo $j=0$), $\omega\delta^j$ (TC), $\omega$ (LS, para todo $j$).
+\tabla{08_formas.tex}{Formas de la intervenci\'on dentro del modelo de l\'ineas a\'ereas.}
+\dos{08_modelo_intervencion.png}{08_corr_residuos.png}{Modelo de l\'ineas a\'ereas con la intervenci\'on elegida (cambio transitorio) y correlograma de sus residuos.}
+\salida{08_intervencion.png}{1}{Izquierda: respuesta de los inicios (\% del nivel) seg\'un la forma. Derecha: perfil de verosimilitud de $\delta$.}
+\par Gana el cambio transitorio con $\delta=\IntDelta$ ($\Delta$SBC frente al pulso: $\IntDSBCAO$; frente al escal\'on: $\IntDSBCLS$). Impacto $\hat\omega=\IntOmegaTC$ ($t=\IntTTC$): $\IntImpactoPct\%$ de inicios en abril, $\IntTresPct\%$ a los tres meses, $\IntSeisPct\%$ a los seis; vida media $\IntVidaMedia$ meses. El escal\'on se descarta: el cierre no dej\'o un cambio permanente de nivel.
+\tabla{08_trayectoria.tex}{Trayectoria del efecto del COVID con la forma elegida (TC, $\delta=\IntDelta$). Como $x_t=100\ln(\text{inicios})$, un efecto $e$ en el nivel equivale a $100\,(e^{e/100}-1)\%$ de inicios.}
+\par El efecto en el nivel es $\hat\omega\,\hat\delta^{\,j}$: se reduce a la mitad en $\IntVidaMedia$ meses ($\ln 0{,}5/\ln\hat\delta$) y a los doce meses es nulo, porque $\hat\delta^{\,j}\to0$. Sumando las ca\'idas proporcionales de todos los meses, la p\'erdida acumulada es $\IntPerdidaMeses$: en total se perdi\'o el equivalente a un mes entero de inicios, concentrado entre abril y julio de 2020.
+
+%======================================================================
+\section{Parte 2: funci\'on de transferencia}\label{sec:mft}
+\textbf{M\'etodo} (preblanqueo en 6 pasos; Enders 5.2). Input $X=(1-B)100\ln$ tasa; output $Y=(1-B)100\ln$ inicios \emph{desestacionalizados}, para que ambas tengan la misma diferenciaci\'on y $v(B)$ se lea como elasticidad. El COVID entra como TC con el $\delta$ de la Secci\'on~\ref{sec:interv}.
+\begin{enumerate}[nosep]
+\item ARMA del input por rejilla y SBC: un MA(1); innovaciones $\alpha_t$.
+\item Mismo filtro sobre $Y$ (sin el efecto COVID), que da $\beta_t$.
+\item FCC $r(k)=\mathrm{corr}(\alpha_t,\beta_{t+k})$ con bandas $\pm2/\sqrt n$ y pesos $\hat v_k=(s_\beta/s_\alpha)\,r(k)$.
+\item[4--5.] Se estima \[Y_t=c+\frac{\delta(B)B^b}{(1-\phi B)^r}X_t+\omega\,TC_t+N_t,\qquad N_t\sim\text{ARMA}(p,q)(P,Q)_{12},\] con $(b,s,r)$ por SBC ($b\le3$, $s\le3$, $r\in\{0,1\}$) y $\phi$ por perfil; despu\'es se re-identifica el ruido.
+\item[6.] Diagn\'ostico: residuos ruido blanco y sin correlaci\'on cruzada con $\alpha$.
+\end{enumerate}
+Variante: el bono a 10 a\~nos como input, m\'as defendible como ex\'ogeno.
+\begin{table}[H]\centering\small
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lcc}
+\toprule
+ & Tasa hipotecaria 30 a\~nos & Bono del Tesoro 10 a\~nos \\
+\midrule
+Filtro de preblanqueo del input & \TFTasaFiltro & \TFBonoFiltro \\
+FCC preblanqueada, $k=0..12$ (input anticipa): $p$ conjunto & \TFTasaPos & \TFBonoPos \\
+FCC preblanqueada, $k=-12..-1$ (retroalimentaci\'on): $p$ conjunto & \TFTasaNeg & \TFBonoNeg \\
+FCC fuera de banda ($\pm\TFBanda$) & \TFTasaSig & \TFBonoSig \\
+Funci\'on de transferencia elegida & \TFTasaEsp, $\phi=0{,}75$ & \TFBonoEsp, $\phi=0{,}65$ \\
+Ruido & \TFTasaRuido & \TFBonoRuido \\
+\textbf{Ganancia $g$ (ee)} & \textcolor{red}{$\TFTasaGan$ ($\TFTasaGanEE$)} & $\TFBonoGan$ ($\TFBonoGanEE$) \\
+\textbf{\% de inicios por +1 pp del input} & \textcolor{red}{$\TFTasaPP$} & $\TFBonoPP$ \\
+Residuos vs.\ $\alpha$, $k<0$: $p$ & \TFTasaCCneg & \TFBonoCCneg \\
+$\Delta$SBC frente al modelo sin input & $\TFTasaDSBC$ & $\TFBonoDSBC$ \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\caption{Funci\'on de transferencia: tasa y bono como input.}
+\end{table}
+\par Con $X_t=(1-B)100\ln$tasa e $Y_t=(1-B)100\ln$inicios desestacionalizados:
+\begin{align*}
+\text{Paso 1 (input):}&\quad X_t=(1+\vartheta B)\,\alpha_t\ \ \Rightarrow\ \ \alpha_t=\frac{X_t}{1+\vartheta B}\quad\text{(MA(1), signo de R)}\\
+\text{Paso 2 (output):}&\quad \beta_t=\frac{Y_t-\hat\omega\,TC_t}{1+\vartheta B}\\
+\text{Paso 3:}&\quad \hat v_j=\frac{\hat\sigma_\beta}{\hat\sigma_\alpha}\,r_{\alpha\beta}(j)\\
+\text{Pasos 4--5:}&\quad Y_t=c+\frac{\delta_0+\delta_1B+\dots+\delta_sB^s}{(1-\phi B)^r}\,X_{t-b}+\omega\,TC_t+N_t,\\ &\quad \phi_p(B)\Phi_P(B^{12})N_t=\theta_q(B)\Theta_Q(B^{12})e_t
+\end{align*}
+con $TC_t=(1-B)\frac{1}{1-\delta B}Z_t$ ($\delta$ de la Secci\'on~\ref{sec:interv}). Modelo elegido ($b=2$, $s=0$, $r=1$):
+\[Y_t=c+\frac{\delta_0}{1-\phi B}\,X_{t-2}+\omega\,TC_t+N_t,\qquad (1-\phi_1B)(1-\Phi_1B^{12})N_t=(1+\vartheta_1B+\vartheta_2B^2)(1+\Theta_1B^{12})e_t,\]
+pesos $v_j=\delta_0\phi^{\,j-2}$ ($j\ge2$) y ganancia $g=\sum_jv_j=\delta_0/(1-\phi)$.
+\dos{04_corr_sa.png}{09_corr_alfa_tasa.png}{Correlogramas del output, $(1-B)$ de los inicios desestacionalizados (queda correlaci\'on estacional negativa del X-13), y del input preblanqueado $\alpha_t$ (ruido blanco: el filtro MA(1) de la tasa funciona).}
+\salida{09_transferencia.png}{1}{Izquierda: FCC de input y output preblanqueados ($k>0$: el input anticipa; $k<0$: retroalimentaci\'on). Derecha: pesos $v_j$ emp\'iricos (barras) y del modelo estimado (rojo).}
+\tabla{09_seleccion_tasa.tex}{Tasa: las seis especificaciones de menor SBC en la b\'usqueda (grilla de $\phi$ con paso 0,2 y ruido univariado inicial). Despu\'es se refina $\phi$ con paso 0,05 ($\hat\phi=\TFTasaPhi$) y se re-identifica el ruido, por eso el SBC final difiere.}
+\tabla{09_robustez_ruido.tex}{Robustez: ganancia de la tasa con la misma funci\'on de transferencia y distintos ruidos. Solo el ruido elegido deja residuos blancos.}
+\salida{09_corr_residuos_tasa.png}{0.6}{Correlograma de los residuos de la funci\'on de transferencia con la tasa (gl ajustados por los par\'ametros del ruido).}
+\salida{09_modelo_tasa.png}{0.8}{Funci\'on de transferencia con la tasa como input (D0, D1\dots: coeficientes de $X_{t-b}$; regresor ya filtrado por $1/(1-\phi B)$).}
+\par Con la tasa: retardo $b=2$ y decaimiento geom\'etrico ($\phi=0{,}75$), es decir, una funci\'on de transferencia MFT$[1,0,(k,0)]$. Ganancia de estado estable $g=\TFTasaGan$ (ee $\TFTasaGanEE$, que incluye la incertidumbre de $\phi$, cuyo ee es $\TFTasaPhiEE$; condicional en $\phi$ ser\'ia $\TFTasaGanEEcond$): +1\,pp de tasa implica $\TFTasaPP\%$ de inicios. Agregar la tasa baja el SBC en $\TFTasaDSBC$ puntos. Residuos ruido blanco y sin correlaci\'on cruzada con $\alpha$. Exogeneidad: la FCC en $k<0$ no es significativa en conjunto ($p=\TFTasaNeg$), pero $r_{-1}$ supera la banda: los inicios anticipan a la tasa en un mes. Con otros ruidos la ganancia va de $\TFRobMax$ a $\TFRobMin$ (de $\TFRobPPMin$ a $\TFRobPPMax\%$ por +1\,pp), siempre significativa: el signo y el orden de magnitud no dependen del ruido. El bono aporta poco y su especificaci\'on no es robusta.
+
+\textbf{¿Se puede aplicar la funci\'on de transferencia?} El MFT supone que la tasa es ex\'ogena: $E(X_t\varepsilon_{t-j})=0$ para todo $j$. Si los inicios anticiparan a la tasa, aparecer\'ian correlaciones cruzadas en rezagos negativos. Los tres chequeos disponibles:
+\begin{table}[H]\centering\small
+\begin{tabular}{lc}
+\toprule
+Chequeo de inicios $\to$ tasa ($k<0$) & $p$ conjunto \\
+\midrule
+FCC del preblanqueo (paso 3) & $\TFTasaNeg$ \\
+Correlaci\'on cruzada residuos--input $\alpha_t$ (diagn\'ostico) & $\TFTasaCCneg$ \\
+Haugh, innovaciones univariadas, 1986--2026 (Secci\'on 4.2) & $\HaughDoceNeg$ \\
+\bottomrule
+\end{tabular}
+\caption{Exogeneidad de la tasa: ninguno rechaza al 5\%.}
+\end{table}
+Ninguno rechaza en conjunto. Quedan dos se\~nales menores: $r_{-1}$ supera la banda individualmente y, en 1986--2007, Haugh $k<0$ da $p=0{,}043$. Son indicios de una retroalimentaci\'on de corto plazo, d\'ebil y no estable entre subper\'iodos. Adem\'as, la tasa hipotecaria se forma sobre todo en el mercado de bonos (sigue al bono a 10 a\~nos), que los inicios dif\'icilmente muevan. Con esta evidencia, la tasa se trata como ex\'ogena y el MFT es aplicable. Como control, la Secci\'on~\ref{sec:var} estima un VAR, que no impone exogeneidad.
+
+%======================================================================
+\section{Parte 2: VAR bivariado (control de robustez)}\label{sec:var}
+El VAR trata a las dos variables sim\'etricamente: no supone que la tasa sea ex\'ogena. Sirve para verificar que el efecto estimado con la funci\'on de transferencia no depende de ese supuesto y para medir la retroalimentaci\'on.
+
+\textbf{M\'etodo} (Enders 5.4--5.8). $X_t=(\Delta100\ln\text{tasa},\ \Delta100\ln\text{inicios SA})'$, ex\'ogenas: constante y COVID (TC). Programado a mano (sin paquete):
+\begin{itemize}[nosep]
+\item Rezagos: AIC, SBC, HQ y LR secuencial con correcci\'on de Sims $(T-c)(\ln|\hat\Sigma_r|-\ln|\hat\Sigma_u|)\sim\chi^2_4$, misma muestra para todo $p\le13$. Criterio: el $p$ del LR (de lo general a lo particular) y, si los residuos no son ruido blanco por ecuaci\'on (LB 12/24/36), se agregan rezagos.
+\item MCO ecuaci\'on por ecuaci\'on, sin eliminar rezagos no significativos (Sims).
+\item $\hat\Sigma$, correlaci\'on de residuos, estabilidad por ra\'ices de la matriz compa\~nera.
+\item Identificaci\'on por Cholesky con la tasa primero ($b_{21}=0$: los inicios no mueven la tasa dentro del mes).
+\item Impulso-respuesta v\'ia VMA, acumulada (= nivel, en \%), bandas por \emph{wild bootstrap} (Rademacher, com\'un a las dos ecuaciones) al 95\% ($\VARboot$ r\'eplicas); orden inverso como sensibilidad.
+\item Causalidad de Granger y descomposici\'on de varianza.
+\end{itemize}
+\par Forma estructural y forma est\'andar estimada, con $X_t=(\Delta100\ln\text{tasa}_t,\ \Delta100\ln\text{inicios}_t)'$:
+\[B\,X_t=\Gamma_0+\sum_{i=1}^{p}\Gamma_iX_{t-i}+\Psi\,TC_t+\varepsilon_t,\qquad B=\begin{pmatrix}1&b_{12}\\b_{21}&1\end{pmatrix};\]
+\[X_t=A_0+\sum_{i=1}^{p}A_iX_{t-i}+C\,TC_t+e_t,\qquad A_i=B^{-1}\Gamma_i,\quad e_t=B^{-1}\varepsilon_t,\quad E(e_te_t')=\Sigma.\]
+Ecuaci\'on por ecuaci\'on (MCO): $\Delta\text{tasa}_t=a_{10}+\sum_{i=1}^p(a^{(i)}_{11}\Delta\text{tasa}_{t-i}+a^{(i)}_{12}\Delta\text{inicios}_{t-i})+c_1TC_t+e_{1t}$, y la an\'aloga para $\Delta\text{inicios}_t$.
+
+Identificaci\'on (Cholesky, tasa primero): la tasa no responde a los inicios dentro del mes, $e_{\text{tasa},t}=\varepsilon_{\text{tasa},t}$ y $e_{\text{inicios},t}=\varepsilon_{\text{inicios},t}-b_{12}\varepsilon_{\text{tasa},t}$; $\Sigma=PP'$ con $P$ triangular inferior. Impulso-respuesta por la VMA:
+\[X_t=\mu+\sum_{h\ge0}\Phi_h\,P\,\varepsilon^{*}_{t-h},\qquad \Phi_0=I,\ \ \Phi_h=\sum_{i=1}^{\min(h,p)}A_i\Phi_{h-i},\qquad \text{respuesta en nivel}=\sum_{i\le h}\Phi_iP,\]
+donde $\varepsilon^{*}_t=P^{-1}e_t$ son los shocks estructurales estandarizados (varianza 1): la columna $k$ de $\Phi_hP$ es la respuesta a un shock de un desv\'io en la variable $k$.
+Elecci\'on de $p$: $\text{AIC}=\ln|\hat\Sigma|+2N/T$, $\text{SBC}=\ln|\hat\Sigma|+N\ln T/T$, $\text{HQ}=\ln|\hat\Sigma|+2N\ln\ln T/T$ y $LR=(T-c)(\ln|\hat\Sigma_{p-1}|-\ln|\hat\Sigma_p|)\sim\chi^2_4$ (Sims).
+\tabla{10_rezagos.tex}{Elecci\'on de rezagos. En rojo, el $p$ que elige cada criterio y el elegido.}
+\par SBC elige $\VARpSBC$, HQ $\VARpHQ$, AIC $\VARpAIC$ y el LR $\VARpLR$; con 5 rezagos la ecuaci\'on de inicios conserva autocorrelaci\'on, as\'i que se sube hasta $p=\VARp$, el primero con residuos blancos en ambas ecuaciones.
+\tabla{10_sigma.tex}{Matriz de covarianzas y correlaci\'on de los residuos de la forma reducida.}
+\tabla{10_diagnostico.tex}{Diagn\'ostico de residuos del VAR($\VARp$).}
+\dos{10_corr_residuos_dlmort.png}{10_corr_residuos_dlhoust_sa.png}{Correlogramas de los residuos del VAR($\VARp$): ecuaci\'on de la tasa y ecuaci\'on de los inicios (los $Q$ no descuentan los coeficientes estimados: son orientativos).}
+\par Correlaci\'on contempor\'anea de residuos $\VARrho$ ($t=\VARrhoT$): casi nula, as\'i que el orden de Cholesky casi no importa ($\hat b_{12}=\VARbdoce$). Estable: m\'odulo m\'aximo de las ra\'ices $\VARmodmax$. Residuos por ecuaci\'on sin autocorrelaci\'on al 5\% (inicios, LB24 $p=\VARlbVivVeinticuatro$, en el borde), no normales; el portmanteau multivariado rechaza ($p=\VARpm$).
+\salida{10_irf.png}{1}{Impulso-respuesta en niveles (respuesta acumulada, \%). Shocks de un desv\'io; banda bootstrap 95\%; punteado: orden inverso.}
+\tabla{10_irf.tex}{Respuestas acumuladas (\%) con IC 95\% bootstrap; en rojo, las que excluyen el cero.}
+\tabla{10_sensibilidad_p.tex}{Sensibilidad al n\'umero de rezagos (respuestas acumuladas a 12 meses; wild bootstrap, 500 r\'eplicas salvo $p=\VARp$).}
+\textbf{Sensibilidad.} El efecto depende de $p$: con $p\le3$ (SBC, HQ, AIC) es chico y no significativo, pero esos VAR dejan autocorrelaci\'on en la ecuaci\'on de inicios (LB24 $p<0{,}01$): el efecto entra a los 3--6 meses (correlaciones de $k=3,5,6$ en la Secci\'on 4.2) y un VAR corto no lo capta. Desde $p=5$ (LR) es significativo: $\VARsensPPCinco\%$ con $p=5$, $\VARsensPPNueve\%$ con $p=9$, $\VARsensPPDoce\%$ con $p=12$ por +1\,pp.
+\par Un shock de tasa de un desv\'io ($+\VARshockTasa\%$ de la tasa, unos $\VARshockTasaPP$\,pp) baja los inicios $\VARvivTasaDoce\%$ a 12 meses (IC [$\VARvivTasaLoDoce$; $\VARvivTasaHiDoce$]). Elasticidad impl\'icita (nivel de inicios sobre nivel de tasa) $\VARelasDoce$ (IC [$\VARelasLoDoce$; $\VARelasHiDoce$]): +1\,pp de tasa implica $\VARelasPPDoce\%$ de inicios. Retroalimentaci\'on: ante un shock de inicios la tasa sube $\VARtasaVivDoce\%$ a 12 meses (IC [$\VARtasaVivLoDoce$; $\VARtasaVivHiDoce$]); el l\'imite inferior est\'a cerca de cero y con $p=5$ el IC ya lo incluye: evidencia moderada. Convenci\'on: $Y_t=b_{10}-b_{12}Z_t+\dots$, por eso $\hat b_{12}=-\hat\sigma_{12}/\hat\sigma^2_{\text{tasa}}$.
+\par Granger: en la ecuaci\'on de $\Delta\text{inicios}$, $H_0:a^{(1)}_{21}=\dots=a^{(p)}_{21}=0$ (la tasa no causa), $F=\frac{(SCR_r-SCR_u)/p}{SCR_u/(T-k)}\sim F_{p,T-k}$; \'idem al rev\'es. Descomposici\'on de varianza a $h$ pasos: $\omega_{jk}(h)=\sum_{i<h}(\Phi_iP)^2_{jk}\big/\sum_{k'}\sum_{i<h}(\Phi_iP)^2_{jk'}$.
+\tabla{10_granger.tex}{Causalidad de Granger.}
+\tabla{10_fevd.tex}{Descomposici\'on de la varianza del error de pron\'ostico.}
+\par Granger: la tasa causa a los inicios ($p=\VARgrTasaViv$); al rev\'es, al 10\% ($p=\VARgrVivTasa$). Pese a la significatividad, cada variable explica poco de la varianza de la otra (a 24 meses: $\VARfevdViv\%$ y $\VARfevdTasa\%$).
+
+\textbf{Qu\'e aporta el VAR.} Confirma el efecto de la tasa sobre los inicios sin imponer exogeneidad ($\VARelasPPDoce\%$ por +1\,pp, contra $\TFTasaPP\%$ de la funci\'on de transferencia). La retroalimentaci\'on existe pero es chica: los shocks de inicios explican $\VARfevdTasa\%$ de la varianza de la tasa y la correlaci\'on contempor\'anea de los residuos es $\VARrho$. El costo es la sensibilidad al n\'umero de rezagos y residuos que el portmanteau no acepta como ruido blanco; por eso la funci\'on de transferencia queda como modelo principal.
+
+%======================================================================
+\section{S\'intesis}
+\begin{table}[H]\centering\small
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lccc}
+\toprule
+M\'etodo & Serie de inicios & Efecto de +1\,pp de tasa a 12 meses & Retroalimentaci\'on \\
+\midrule
+Rezagos distribuidos & original, $(1-B)(1-B^{12})$ & $\PPDoce\%$ (IC [$\PPDoceLo$; $\PPDoceHi$], impreciso) & Haugh $k<0$: $r_{-1}=0{,}15$ \\
+Funci\'on de transferencia & SA, $(1-B)$ & $\TFTasaPP\%$ (de $\TFRobPPMin$ a $\TFRobPPMax$ seg\'un el ruido) & FCC $k<0$ conjunta no significativa \\
+VAR & SA, $(1-B)$ & $\VARsensPPCinco\%$ ($p=5$) a $\VARelasPPDoce\%$ ($p=\VARp$) & tasa $\leftarrow$ inicios: IC roza el cero; FEVD $\VARfevdTasa\%$ \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\caption{Tres estimaciones del mismo efecto (en puntos logar\'itmicos: $-6{,}3$ equivale a $-6{,}1\%$).}
+\end{table}
+\textbf{Conclusi\'on provisoria.} +1\,pp de tasa reduce los inicios alrededor de 6\% en un a\~no ($\TFTasaPP\%$ en la funci\'on de transferencia; entre $\TFRobPPMin$ y $\TFRobPPMax\%$ seg\'un el ruido), con dos meses de retardo y el grueso del efecto en el primer semestre. El VAR, que no impone exogeneidad, da $\VARelasPPDoce\%$, y los rezagos distribuidos el mismo signo y orden de magnitud con menos precisi\'on. Hay retroalimentaci\'on de los inicios a la tasa, pero es chica y no altera la estimaci\'on. La funci\'on de transferencia queda como modelo principal, por parsimonia y estabilidad, y el VAR como control.
+
+\end{document}

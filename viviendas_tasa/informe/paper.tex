@@ -1,0 +1,393 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish,es-nodecimaldot,es-noshorthands]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{icomma}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[font=small,labelfont=bf]{caption}
+\usepackage{float}
+\usepackage[section]{placeins}
+\usepackage{adjustbox}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage[colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue!50!black]{hyperref}
+\onehalfspacing
+\setlength{\parskip}{5pt}
+\renewcommand{\arraystretch}{1.12}
+\graphicspath{{../salidas/figuras/}}
+\captionsetup[table]{name=Cuadro}
+% Pendientes: resaltado amarillo si esta soul (Overleaf lo tiene); si no, rojo entre corchetes
+\newcommand{\pendienteRojo}[1]{\textcolor{red}{[#1]}}
+\IfFileExists{soul.sty}{\usepackage{soul}\sethlcolor{yellow}\let\pendiente\hl}{\let\pendiente\pendienteRojo}
+
+% Los cuadros toman sus numeros del codigo (salidas/tablas/valores_XX.tex)
+\input{../salidas/tablas/valores_02.tex}
+\input{../salidas/tablas/valores_03.tex}
+\input{../salidas/tablas/valores_04.tex}
+\input{../salidas/tablas/valores_05.tex}
+\input{../salidas/tablas/valores_06.tex}
+\input{../salidas/tablas/valores_07.tex}
+\input{../salidas/tablas/valores_08.tex}
+\input{../salidas/tablas/valores_09.tex}
+\input{../salidas/tablas/valores_10.tex}
+\input{../salidas/tablas/valores_11.tex}
+\input{../salidas/tablas/valores_12.tex}
+\input{../salidas/tablas/valores_13.tex}
+\input{../salidas/tablas/valores_14.tex}
+\input{../salidas/tablas/valores_15.tex}
+\input{../salidas/tablas/valores_16.tex}
+\input{../salidas/tablas/valores_16b.tex}
+
+\newcommand{\tabla}[3]{\begin{table}[htbp]\centering\small\caption{#2}\label{#3}\begin{adjustbox}{max width=\linewidth}\input{../salidas/tablas/#1}\end{adjustbox}\end{table}}
+\newcommand{\figura}[4]{\begin{figure}[htbp]\centering\includegraphics[width=#2\linewidth]{#1}\caption{#3}\label{#4}\end{figure}}
+
+\title{\textbf{Tasa hipotecaria e inicios de construcci\'on de viviendas en Estados Unidos, 1985--2026}}
+\author{Paulo Lautaro Gonzalez}
+\date{}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+
+Este trabajo mide cuánto y con qué rezago responden los inicios de construcción de viviendas en Estados Unidos a la tasa hipotecaria fija a 30 años, con datos mensuales de enero de 1985 a agosto de 2026. Después de modelar cada serie por separado y de descartar una relación de largo plazo entre ellas, se estima una función de transferencia con la tasa como variable exógena. Una suba de un punto porcentual de la tasa reduce los inicios alrededor de 6\%, con dos meses de retardo. La mitad del efecto se alcanza a los cuatro meses y casi todo en un año. El resultado se mantiene en un VAR que no impone exogeneidad, al agregar el bono del Tesoro a 10 años, al usar los permisos de construcción como variable dependiente, al controlar por costos y oferta, y por subperíodos. En el episodio 2022--2024 el modelo, estimado solo con datos hasta 2021, atribuye a la suba de tasas una caída de los inicios de 32 \%, contra 15 \% observado. Esa diferencia está dentro del error que el propio modelo espera. Las hipótesis de asimetría y de efecto cerrojo (\emph{lock-in}) no encuentran respaldo fuera de la muestra.
+
+\end{abstract}
+
+\noindent\emph{Palabras clave: inicios de viviendas, tasa hipotecaria, función de transferencia, análisis de intervención, VAR, cointegración.}
+
+\section{Introducción}
+
+Entre enero de 2021 y octubre de 2023 la tasa hipotecaria fija a 30 años en Estados Unidos pasó de 2,7\% a 7,6\% (promedios mensuales), casi cinco puntos en menos de tres años. La construcción residencial depende del crédito de largo plazo, por lo que surge la pregunta: ¿cuánto caen los inicios de construcción de viviendas cuando sube la tasa hipotecaria, y cuánto tardan en hacerlo?
+
+El objetivo de este trabajo es responder esa pregunta con las herramientas del análisis de series de tiempo. La variable de interés son los inicios de construcción de viviendas privadas, mientras que la variable explicativa es la tasa hipotecaria. La tasa es una causa posible de los inicios y no una parte de ellos, ya que encarece el financiamiento de compradores y constructores. Además, se forma en el mercado de bonos, fuera del sector de la construcción. Esta es una cuestión no menor ya que, si la tasa puede tratarse como exógena, la herramienta adecuada es la función de transferencia. En cambio, si los inicios también mueven a la tasa, las dos variables serían endógenas y correspondería un vector autorregresivo (VAR). Son los datos los que van a definir cuál de los dos casos es el relevante.
+
+Primero se estudia cada serie por separado: estacionalidad, estacionariedad, modelo ARIMA y, para los inicios, el efecto del cierre de actividades por la pandemia en abril de 2020, que se trata como una intervención. Después se estudia la relación, mostrando que en niveles es espuria, que no hay una relación de largo plazo que justifique un modelo de corrección de errores, y que la retroalimentación de los inicios hacia la tasa es débil. Con esa evidencia se estima la función de transferencia y se contrasta su resultado con un VAR y con otras cuatro variantes. Por último se usa el modelo para leer el episodio 2022--2024.
+
+El resultado principal es que una suba de un punto porcentual de la tasa hipotecaria reduce los inicios alrededor de un 6\%, con un retardo de dos meses y un ajuste que se completa casi por entero en un año. La magnitud es estable entre métodos, especificaciones y períodos, con la única excepción del colapso inmobiliario de 2006--2011. En 2022--2024 los inicios cayeron menos de lo que el modelo predice, pero la diferencia es de un tamaño que el propio modelo considera normal.
+
+La sección 2 presenta el marco económico. La sección 3 describe los datos. La sección 4 analiza cada serie y la sección 5, la relación entre ambas y la exogeneidad de la tasa. La sección 6 presenta la función de transferencia, la sección 7 los controles de robustez, la sección 8 el episodio 2022--2024. La sección 9 concluye. Todas las estimaciones, contrastes y diagnósticos en los que se apoya el texto se presentan en el informe de resultados que acompaña a este trabajo como documento aparte.
+
+\section{Marco económico y antecedentes}
+
+Los inicios de construcción son el flujo con el que se ajusta el stock de viviendas. En el enfoque de mercado de activos (Poterba, 1984), el costo anual de usar una vivienda por cada dólar de su valor es
+
+\[ u_t=(1-\tau)\,i_t+\tau_p+\delta_h-E_t\left(\pi^h_{t+1}\right), \]
+
+donde $i_t$ es la tasa hipotecaria, $\tau$ la alícuota a la que se deducen los intereses, $\tau_p$ el impuesto a la propiedad, $\delta_h$ la depreciación y el último término la apreciación esperada del precio de la vivienda. Una suba de la tasa eleva el costo de uso, reduce el stock de viviendas deseado y, con él, el precio al que conviene construir. De ahí sale la primera hipótesis: el efecto de la tasa sobre los inicios es negativo.
+
+Por otro lado, los constructores enfrentan costos por cambiar el ritmo de obra (Topel y Rosen, 1988), y entre la decisión de construir y el inicio físico median la compra del terreno, el proyecto, el financiamiento y el permiso municipal. Esto permite afirmar que el ajuste no es inmediato. Además, los compradores que ya tienen una tasa comprometida no se ven afectados por la suba del mes. La segunda hipótesis es, entonces, que la respuesta empieza con algún retardo y se reparte en varios meses. Una implicancia que se puede contrastar es que los permisos de construcción, que preceden al inicio de la obra, deberían reaccionar antes.
+
+La tercera cuestión es la dirección de la causalidad. La tasa hipotecaria a 30 años se fija sobre el rendimiento del bono del Tesoro a 10 años más un margen, y ese rendimiento depende de la política monetaria y de las expectativas de inflación, no de la construcción. Eso sugiere tratar a la tasa como exógena. Pero los inicios son también un indicador adelantado del ciclo. Puede pensarse que un aumento repentino en los inicios de construcciones lleve al mercado de bonos a esperar más actividad y tasas más altas. Si ese canal existe, debería aparecer como una respuesta de la tasa a los inicios de signo positivo y en plazos cortos. El trabajo busca medir este canal, no solo suponerlo.
+
+Por último, los inicios son un flujo y la tasa es un precio. Si el stock de viviendas se ajusta al costo de uso, un nivel más alto de la tasa reduce el stock deseado, pero no tiene por qué reducir para siempre el flujo de construcción. Una vez completado el ajuste, los inicios vuelven a depender de la depreciación y del crecimiento de los hogares (Mayer y Somerville, 2000). De ser así, no debería haber una relación estable de largo plazo entre el nivel de los inicios y el nivel de la tasa, y la relación relevante es entre sus variaciones. La sección 5 lo contrasta con pruebas de cointegración.
+
+En cuanto a los antecedentes empíricos, el par de series de este trabajo ya fue usado en la literatura de series de tiempo: Hallin, La Vecchia y Liu (2022) modelan los inicios de viviendas desestacionalizados y la tasa hipotecaria a 30 años, en diferencias, entre 1989 y 2016, pero como ilustración de un método de estimación de modelos VARMA y no para medir la respuesta de la construcción a la tasa. Las estimaciones macroeconómicas más difundidas, por su parte, se refieren a la inversión residencial y a \emph{shocks} de política monetaria, y no a los inicios y a la tasa hipotecaria; sus magnitudes están en otras unidades y no son comparables con la de este trabajo, por lo que no se presenta un cuadro de estimaciones previas. Para el episodio 2022--2024 es relevante otra línea de trabajos, la que estudia cómo las tasas fijas contratadas en el pasado reducen la movilidad de los propietarios (Quigley, 1987; Ferreira, Gyourko y Tracy, 2010). Ese efecto cerrojo (\emph{lock-in}) puede desviar demanda desde las viviendas usadas hacia las nuevas, y se contrasta en la sección 8.
+
+\section{Datos}
+
+Las series son mensuales y provienen de la base FRED del Banco de la Reserva Federal de St. Louis. Los inicios de construcción de viviendas privadas son los que releva la Oficina del Censo: la serie sin desestacionalizar (HOUSTNSA, en miles de unidades) se usa para el análisis univariado, y la desestacionalizada (HOUST, tasa anual, dividida por 12) para la función de transferencia y el VAR. La tasa hipotecaria es la tasa fija a 30 años de la encuesta de Freddie Mac (MORTGAGE30US), semanal, llevada a promedios mensuales. Se usan además el rendimiento del bono del Tesoro a 10 años (GS10), los permisos de construcción (PERMIT) y el indicador de recesiones del NBER.
+
+\begin{table}[htbp]\centering\small
+\caption{Series, fuentes y transformaci\'on.}\label{tab:series}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{llll}
+\toprule
+Serie & C\'odigo FRED & Fuente & Uso \\
+\midrule
+Inicios de viviendas privadas, sin desestacionalizar & HOUSTNSA & Oficina del Censo & An\'alisis univariado \\
+Inicios de viviendas privadas, desestacionalizados (tasa anual / 12) & HOUST & Oficina del Censo & Funci\'on de transferencia y VAR \\
+Tasa hipotecaria fija a 30 a\~nos (promedio mensual) & MORTGAGE30US & Freddie Mac & \emph{Input} \\
+Rendimiento del bono del Tesoro a 10 a\~nos & GS10 & Reserva Federal & VAR trivariado \\
+Permisos de construcci\'on & PERMIT & Oficina del Censo & \emph{Output} alternativo \\
+\midrule
+\multicolumn{4}{l}{Transformaci\'on: $h_t=100\ln(\text{inicios})$, $r_t=100\ln(\text{tasa})$. Muestra: 1985-01 a 2026-08.} \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table}
+
+
+\figura{02_niveles.png}{0.95}{Inicios de viviendas y tasa hipotecaria, 1971--2026.}{fig:niveles}
+
+
+La muestra va de enero de 1985 a agosto de 2026 (500 observaciones). Se empieza en 1985 para dejar afuera el régimen de alta volatilidad de comienzos de los ochenta, ya que entre 1979 y 1984 el desvío de la variación mensual de la tasa fue de 0,58 puntos porcentuales, 2,6 veces el de 1985--2007 (0,23).
+
+Las dos series se trabajan como cien por el logaritmo natural: $h_t=100\ln(\text{inicios})$ por un lado, y $r_t=100\ln(\text{tasa})$ por otro. Con esa transformación las diferencias se leen como variaciones porcentuales y los coeficientes que relacionan a las series como elasticidades.
+
+Como la tasa entra en logaritmos, el efecto de una suba de un punto porcentual depende del nivel de partida. En todo el trabajo se lo evalúa en el último dato de la muestra (6,67 \%), donde un punto equivale a un aumento de 14,0 \% de la tasa. Los efectos se informan en puntos logarítmicos, que para valores chicos se leen como porcentajes: 6,3 puntos equivalen a 6,1 \%.
+
+\section{Análisis de cada serie}
+
+\subsection{Estacionalidad}
+
+La tasa hipotecaria no tiene estacionalidad. En la regresión de su variación mensual sobre once variables binarias mensuales, la prueba conjunta da F = 1,37 (p = 0,18). Los inicios tienen una estacionalidad fuerte (F = 43,5, las variables estacionales explican la mitad de la variación mensual) y, además, cambiante, porque al dejar que el patrón difiera entre 1985--2007 y 2008--2026, la prueba de igualdad se rechaza (F = 4,13 con p $<$ 0,001). Un patrón que cambia no se puede representar con variables binarias fijas, corresponde tratarlo como estocástico, con la diferencia estacional $(1-B^{12})$.
+
+\tabla{02_estacionalidad.tex}{Estacionalidad: variables binarias mensuales y cambio de patr\'on.}{tab:estac}
+
+
+\subsection{Estacionariedad}
+
+La función de autocorrelación de los inicios en niveles decae muy lento ($\rho_1$ = 0,93; $\rho_{24}$ = 0,66). Con la diferencia regular quedan picos que no decaen en los rezagos 12, 24 y 36 (0,53; 0,48; 0,48): falta la diferencia estacional. Con la diferencia estacional sola, la función sigue siendo gruesa ($\rho_1$ = 0,77), falta la regular. Se da recién con $(1-B)(1-B^{12})$ que la serie es estacionaria, con autocorrelaciones significativas solo en los rezagos 1 ($-$0,39) y 12 ($-$0,45) y sus vecinos. Para la tasa alcanza con la primera diferencia: el nivel tiene $\rho_1$ = 0,99 y la diferencia, $\rho_1$ = 0,35 con el resto cerca de cero.
+
+\figura{03_correlogramas.png}{1}{Funciones de autocorrelaci\'on y autocorrelaci\'on parcial por filtro.}{fig:correlogramas}
+
+
+La prueba de Dickey--Fuller aumentada, aplicada con el esquema descendente de Dickey y Pantula (1987) y doce rezagos, coincide: no rechaza la raíz unitaria en el nivel de ninguna de las dos series ($\tau$ = $-$1,86 para los inicios y $-$1,98 para la tasa, contra un valor crítico de $-$2,87) y la rechaza en las diferencias ($-$5,30 y $-$5,66). La prueba no dice nada sobre la raíz estacional, y sobre la serie con diferencia estacional da un resultado frágil: rechaza con doce rezagos (p = 0,005) y no con los catorce que elige el criterio de Schwarz (p = 0,055). En ese caso se siguió al correlograma.
+
+\tabla{03_adf.tex}{Prueba de Dickey--Fuller aumentada.}{tab:adf}
+
+
+La elección del filtro se confirmó comparando, sobre las mismas fechas, el mejor modelo ARMA admisible para cada filtro rival. La doble diferencia gana por 49,1 puntos del criterio de Schwarz (SBC) a la diferencia regular con variables estacionales fijas, y por 9,2 a la diferencia estacional sola, cuyo mejor modelo necesita además una raíz autorregresiva casi unitaria.
+
+\tabla{04_filtros.tex}{Filtros rivales comparados por SBC.}{tab:filtros}
+
+
+\subsection{Modelos univariados}
+
+Para los inicios, entre 48 modelos ARMA estacionales sobre la serie filtrada (20 admisibles), el criterio de Schwarz elige el que sugiere el correlograma, el modelo de líneas aéreas de Box y Jenkins (Box et al., 2015):
+
+\[ (1-B)(1-B^{12})\,h_t=(1-\theta B)(1-\Theta B^{12})\,a_t, \]
+
+con $\theta$ = 0,449 (error estándar 0,039), $\Theta$ = 0,838 (0,028) y un desvío de las innovaciones de 8,25 \%. Los residuos son ruido blanco (Ljung--Box con 12, 24 y 36 rezagos: p = 0,41; 0,47; 0,53) y, una vez tratado abril de 2020, normales (Jarque--Bera 4,0; p = 0,13). Ningún parámetro agregado resulta significativo y los coeficientes son estables entre 1985--2007 y 2008--2026 ($\theta$ pasa de 0,49 a 0,42 y $\Theta$ de 0,80 a 0,81). La limitación es la varianza: los cuadrados de los residuos están autocorrelacionados y el desvío sube de 7,5 a 9,3 entre subperíodos.
+
+Para la tasa el modelo es un ARIMA(0,1,1) sin constante:
+
+\[ (1-B)\,r_t=(1-\theta B)\,a_t, \]
+
+con $\theta$ = $-$0,439 (0,041) y un desvío de 3,13\%. El coeficiente negativo implica una autocorrelación positiva de un mes en las variaciones, la inercia propia de un promedio mensual de datos semanales. Los residuos no tienen autocorrelación (p = 0,93; 0,32; 0,37), pero tienen colas pesadas (curtosis 6,0) y varianza cambiante. Los mayores corresponden a diciembre de 2008, junio de 2013, y abril y septiembre de 2022.
+
+Como control, los dos modelos se evaluaron fuera de la muestra en 2018--2019, con 24 orígenes móviles y órdenes elegidos solo con datos hasta 2017. El modelo de los inicios reduce la raíz del error cuadrático medio del paseo aleatorio estacional entre 19\% (a un mes) y 34 \% (a tres meses), aunque a doce meses empata con repetir el valor del año anterior. El de la tasa mejora 10\% al paseo aleatorio a un mes y nada a doce, lo esperable para un precio de mercado.
+
+\subsection{Intervención: abril de 2020}
+
+En abril de 2020, con el cierre de actividades por la pandemia, los inicios cayeron de golpe. Sin tratarlo, ese mes deja un residuo de $-$5,1 desvíos. Se lo modela como una intervención sobre el modelo de líneas aéreas, $h_t=\omega\,\xi(B)Z_t+N_t$, donde $Z_t$ es un pulso en abril de 2020 y $N_t$ el ruido ARIMA de la sección anterior. Se comparan tres formas: un pulso que dura un mes ($\xi(B)=1$), un cambio transitorio que se disipa geométricamente ($\xi(B)=1/(1-\delta B)$) y un escalón permanente ($\xi(B)=1/(1-B)$). El parámetro $\delta$ se estima por perfil de verosimilitud y la forma se elige por SBC.
+
+\tabla{08_formas.tex}{Formas de la intervenci\'on.}{tab:formas}
+
+
+\figura{08_intervencion.png}{1}{Respuesta de los inicios seg\'un la forma de la intervenci\'on y perfil de verosimilitud de $\delta$.}{fig:intervencion}
+
+
+Gana el cambio transitorio, con $\delta$ = 0,60: mejora el SBC en 10,1 puntos frente al pulso y en 14,3 frente al escalón. El impacto estimado es $\omega$ = $-$45,3 (t = $-$6,3), es decir, una caída de 36,4 \% en abril, que se reduce a 9,3 \% a los tres meses y a 2,1 \% a los seis. La vida media del efecto es de 1,4 meses. Sumada a lo largo del tiempo, la pérdida equivale a un mes completo de inicios. El escalón queda descartado ya que el cierre no dejó un cambio permanente de nivel. Esta intervención se mantiene en todos los modelos que siguen.
+
+\section{La relación entre las series y la exogeneidad de la tasa}
+
+\subsection{En niveles: regresión espuria y ausencia de cointegración}
+
+La regresión de los inicios sobre la tasa en niveles da una pendiente positiva y aparentemente significativa (0,31; t = 7,7), con un estadístico de Durbin--Watson de 0,15. El signo es el contrario al esperado. Al agregar variables estacionales, el coeficiente de determinación (0,26) supera al Durbin--Watson (0,09), lo que hace saltar las alarmas de una regresión espuria (Granger y Newbold, 1974). Cuando las dos series se filtran con $(1-B)(1-B^{12})$, la relación contemporánea desaparece ($R^2$ = 0,02).
+
+\tabla{07_alarma.tex}{Regresiones en niveles y filtradas.}{tab:alarma}
+
+
+Que la regresión en niveles sea espuria no descarta por sí solo una relación de largo plazo porque dos series integradas pueden estar cointegradas. Se aplicaron tres pruebas sobre los niveles de los inicios desestacionalizados y de la tasa, todas con hipótesis nula de no cointegración. En la de Engle y Granger, el estadístico de los residuos queda entre $-$3,00 y $-$1,78 según los rezagos, contra un valor crítico de $-$3,35 al 5 \% (MacKinnon, 2010): no rechaza, tampoco con la regresión invertida. En la de Johansen, la traza rechaza por muy poco con tres y cuatro rezagos (20,26 contra 19,96 con tres) y no rechaza con dos ni con diez. El máximo autovalor no rechaza con tres (15,34 contra 15,67). Ese rechazo es frágil, desaparece al quitar las variables de la pandemia, y el vector que implicaría no tiene sentido económico, porque la tasa entra con signo positivo y los inicios no corrigen el desvío. En la prueba de bandas de Pesaran, Shin y Smith (2001), el estadístico F es 4,06, por debajo de la cota inferior de 4,94.
+
+\begin{table}[htbp]\centering\small
+\caption{Pruebas de cointegraci\'on entre los niveles de los inicios y de la tasa ($H_0$: no hay cointegraci\'on).}\label{tab:coint}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{llll}
+\toprule
+Prueba & Estad\'istico & Valor cr\'itico 5\% & Decisi\'on \\
+\midrule
+Engle--Granger ($\tau$ de los residuos, 0 a 12 rezagos) & de $\EGTauMin$ a $\EGTauMax$ & $\EGVCcinco$ (MacKinnon, 2010) & No rechaza \\
+Johansen, traza ($K=3$) & $\JohTrazaSBC$ & $\JohTrazaVC$ & Rechaza por poco \\
+Johansen, m\'aximo autovalor ($K=3$) & $\JohEigSBC$ & $\JohEigVC$ & No rechaza \\
+Johansen, traza sin variables de la pandemia & de $\JohSinCovidMin$ a $\JohSinCovidMax$ & $\JohTrazaVC$ & No rechaza \\
+Bandas (PSS), estad\'istico $F$ & $\PSSF$ & cotas $\PSSCotaInf$ y $\PSSCotaSup$ & No rechaza \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table}
+
+
+No hay, entonces, evidencia sólida de una relación de largo plazo entre el nivel de los inicios y el de la tasa, en línea con el argumento de la sección 2. La consecuencia práctica es que el análisis se hace con las series en diferencias y no corresponde un modelo de corrección de errores.
+
+\subsection{En innovaciones: quién anticipa a quién}
+
+Para estudiar la relación sin el riesgo de la regresión espuria se usan las innovaciones de los dos modelos univariados. Si las innovaciones no estuvieran relacionadas, su correlación cruzada sería nula en todos los rezagos. La prueba de Haugh (1976) lo contrasta con la suma de los cuadrados de las correlaciones.
+
+\figura{07_relacion.png}{1}{Correlaci\'on cruzada de las innovaciones.}{fig:relacion}
+
+
+Las innovaciones están correlacionadas (p $<$ 0,001 con seis rezagos hacia cada lado). La dirección dominante es de la tasa a los inicios: las correlaciones en las que la tasa anticipa son significativas en conjunto (p = 0,014) y negativas a tres, cinco y seis meses. La dirección inversa no es significativa en conjunto (p = 0,11), pero deja una señal: la correlación en la que los inicios anticipan a la tasa en un mes es positiva (0,15) y supera la banda, y en el subperíodo 1986--2007 esa dirección es significativa (p = 0,043). Es el signo y el plazo que predice el canal de indicador adelantado de la sección 2.
+
+\subsection{Qué metodología corresponde}
+
+La función de transferencia exige que el \emph{input} sea exógeno, que los inicios no anticipen a la tasa. La evidencia disponible son tres contrastes de las correlaciones en rezagos negativos, y ninguno rechaza al 5 \%.
+
+\begin{table}[htbp]\centering\small
+\caption{Exogeneidad de la tasa: tres contrastes de la retroalimentaci\'on (correlaciones en rezagos negativos).}\label{tab:exog}
+\begin{tabular}{lc}
+\toprule
+Contraste & $p$ conjunto \\
+\midrule
+Correlaci\'on cruzada de las innovaciones univariadas (Haugh), $k=-12,\dots,-1$ & $\HaughDoceNeg$ \\
+Correlaci\'on cruzada preblanqueada, $k=-12,\dots,-1$ & $\TFTasaNeg$ \\
+Residuos de la funci\'on de transferencia contra el \emph{input} preblanqueado, $k<0$ & $\TFTasaCCneg$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+Quedan dos indicios menores, la correlación a un mes y el resultado del subperíodo 1986--2007. Apuntan a una retroalimentación de corto plazo, débil y no estable en el tiempo. Sumado a que la tasa hipotecaria sigue de cerca al bono a 10 años, que la construcción difícilmente mueva, la tasa se trata como exógena y la función de transferencia es el modelo principal. Como el supuesto no se cumple de manera exacta, la sección 7 estima un VAR, que no lo impone, y verifica que el resultado no dependa de él.
+
+\section{Función de transferencia}
+
+El \emph{output} es la variación mensual de los inicios desestacionalizados, $Y_t=(1-B)\,h^{sa}_t$, y el \emph{input}, la variación mensual de la tasa, $X_t=(1-B)\,r_t$. Se usa la serie desestacionalizada para que las dos variables tengan la misma diferenciación y los pesos de la función de transferencia se lean como elasticidades. La pandemia entra como el cambio transitorio de la sección 4.4.
+
+La identificación sigue el procedimiento de preblanqueo. Primero se ajusta un modelo ARMA al \emph{input} (un MA(1)) y se obtienen sus innovaciones. Después se aplica el mismo filtro al \emph{output}. La correlación cruzada entre las dos series filtradas es proporcional a los pesos de la respuesta al impulso y orienta la forma de la función de transferencia. Por último se estima el modelo completo, con el retardo y los órdenes elegidos por SBC, y se vuelve a identificar el ruido.
+
+\figura{09_transferencia.png}{1}{Correlaci\'on cruzada preblanqueada y pesos de la respuesta al impulso.}{fig:transferencia}
+
+
+La correlación cruzada preblanqueada no muestra picos nítidos. Las correlaciones en las que la tasa anticipa no son significativas en conjunto (p = 0,57). La identificación se apoya, por eso, en la comparación de modelos estimados. El elegido tiene un retardo de dos meses y un decaimiento geométrico:
+
+\[ Y_t=c+\frac{\delta_0}{1-\phi B}\,X_{t-2}+\omega\,TC_t+N_t, \]
+
+donde $TC_t$ es el cambio transitorio de la pandemia y $N_t$ sigue un proceso ARMA$(1,2)(1,1)_{12}$. Los pesos de la respuesta son $v_j=\delta_0\phi^{\,j-2}$ para $j\ge2$ y la ganancia, es decir, el efecto acumulado de largo plazo, es $g=\delta_0/(1-\phi)$.
+
+\begin{table}[htbp]\centering\small
+\caption{Funci\'on de transferencia con la tasa y con el bono como \emph{input}.}\label{tab:mft}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lcc}
+\toprule
+ & Tasa hipotecaria 30 a\~nos & Bono del Tesoro 10 a\~nos \\
+\midrule
+Filtro de preblanqueo del \emph{input} & \TFTasaFiltro & \TFBonoFiltro \\
+Correlaci\'on cruzada, $k=0,\dots,12$: $p$ conjunto & \TFTasaPos & \TFBonoPos \\
+Correlaci\'on cruzada, $k=-12,\dots,-1$: $p$ conjunto & \TFTasaNeg & \TFBonoNeg \\
+Funci\'on de transferencia elegida & \TFTasaEsp, $\phi=0{,}75$ & \TFBonoEsp, $\phi=0{,}65$ \\
+Ruido & \TFTasaRuido & \TFBonoRuido \\
+Ganancia $g$ (error est\'andar) & $\TFTasaGan$ ($\TFTasaGanEE$) & $\TFBonoGan$ ($\TFBonoGanEE$) \\
+Puntos de inicios por +1 pp del \emph{input} & $\TFTasaPP$ & $\TFBonoPP$ \\
+$\Delta$SBC frente al modelo sin \emph{input} & $\TFTasaDSBC$ & $\TFBonoDSBC$ \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table}
+
+
+La estimación da $\delta_0$ = $-$0,112 (error estándar 0,029) y $\phi$ = 0,75 (0,10). La ganancia es $-$0,45: una suba de 1 \% de la tasa reduce los inicios 0,45 \% en el largo plazo. Su error estándar es 0,15 cuando se incorpora la incertidumbre sobre $\phi$, y 0,11 si $\phi$ se toma como dado. En términos de puntos porcentuales, una suba de un punto de la tasa reduce los inicios 6,3 puntos logarítmicos. No hay efecto en el mes de la suba ni en el siguiente; la mitad del efecto se alcanza a los cuatro meses, el retardo medio es de cinco meses y a los doce meses se completó el 96 \%.
+
+El modelo pasa los controles de diagnóstico. Los residuos son ruido blanco y no están correlacionados con las innovaciones del \emph{input}, ni en los rezagos positivos ni en los negativos (p = 0,20 para estos últimos). Incluir la tasa mejora el SBC en 8,4 puntos frente al modelo sin \emph{input}.
+
+\tabla{09_robustez_ruido.tex}{Ganancia de la tasa con distintas especificaciones del ruido.}{tab:ruido}
+
+
+La ganancia depende poco del ruido: con otras especificaciones va de $-$0,34 a $-$0,45 (de 4,8 a 6,3 puntos por cada punto de tasa) y siempre es significativa, aunque solo la elegida deja residuos blancos. El bono a 10 años como \emph{input} alternativo, más defendible como exógeno, aporta menos: su ganancia es $-$0,11 (0,07) y su especificación no es robusta. Lo que mueve a los inicios es la tasa hipotecaria.
+
+\section{Robustez}
+
+El resultado de la sección anterior descansa en una forma funcional, en un supuesto de exogeneidad y en una muestra. Esta sección cambia cada uno. El Cuadro~\ref{tab:sintesis} reúne todas las estimaciones.
+
+\begin{table}[htbp]\centering\small
+\caption{Efecto de una suba de un punto porcentual de la tasa sobre los inicios: todas las estimaciones (puntos logar\'itmicos).}\label{tab:sintesis}
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lll}
+\toprule
+Modelo & Efecto & Comentario \\
+\midrule
+Funci\'on de transferencia (secci\'on 6) & $\TFTasaPP$ (largo plazo) & de $\TFRobPPMin$ a $\TFRobPPMax$ seg\'un el ruido \\
+VAR bivariado (7.1) & $\VARelasPPDoce$ (12 meses) & sensible al n\'umero de rezagos \\
+VAR con el bono, tasa primero (7.2) & $\TRIelasAltPPDoce$ (12 meses) & v\'ia \emph{shock} del bono: $\TRIelasBonoPPDoce$, no significativo \\
+Permisos como \emph{output} (7.3) & $\TFPPermPP$ & un mes antes que los inicios \\
+Con costos y oferta (7.4) & de $\CtlMatOfePP$ a $\CtlMadPP$ & la oferta es parte del canal \\
+Por per\'iodo (7.5) & de $\EstPPCuatro$ a $\EstPPUno$ & salvo 2006--2011: $\EstPPTres$ \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\end{table}
+
+
+\subsection{Sin imponer exogeneidad: VAR}
+
+Se estimó un VAR con las variaciones de la tasa y de los inicios desestacionalizados, con la constante y el cambio transitorio de la pandemia como variables exógenas. Los criterios de información eligen pocos rezagos (uno a tres) y la prueba secuencial de razón de verosimilitud, cinco. Como con cinco la ecuación de los inicios conserva autocorrelación, se usaron nueve, el primer orden con residuos blancos en las dos ecuaciones. El sistema es estable. La identificación es por Cholesky con la tasa primero, y el orden casi no importa porque la correlación contemporánea de los residuos es 0,02. Las bandas se obtuvieron por \emph{wild bootstrap} (Gonçalves y Kilian, 2004), con mil réplicas.
+
+\figura{10_irf.png}{1}{Funciones de impulso-respuesta acumuladas del VAR (banda bootstrap de 95\%).}{fig:irf}
+
+
+Un \emph{shock} de un desvío en la tasa (unos 0,21 puntos porcentuales) reduce los inicios 2,0\% a doce meses, con un intervalo de 95\% de $-$3,3 a $-$0,6. Llevado a un punto porcentual, el efecto es de 6,0 puntos, contra 6,3 de la función de transferencia. El VAR mide además la retroalimentación: ante un \emph{shock} de inicios la tasa sube 1,3\% a doce meses, con un intervalo cuyo límite inferior roza el cero (0,07 a 2,53). En la prueba de Granger la tasa causa a los inicios (p = 0,036) y la dirección inversa solo es significativa al 10\% (p = 0,096). Cada variable explica muy poco de la varianza de la otra: 2\% y 3\% a 24 meses. La retroalimentación existe, tiene el signo esperado y es chica.
+
+El VAR tiene debilidades. Por un lado, el efecto depende del número de rezagos. Con uno a tres es chico y no significativo, y solo desde cinco se parece al de la función de transferencia, lo que es coherente con una respuesta que llega entre los tres y los seis meses. Y la prueba conjunta de autocorrelación de los residuos rechaza (p = 0,004). Por eso el VAR queda como control y no como modelo principal.
+
+\subsection{El bono a 10 años}
+
+% La seccion 7.2 esta subrayada en la version Word.
+{Al agregar el rendimiento del bono a 10 años al VAR, el efecto de un punto de tasa hipotecaria sobre los inicios es de 6,5 puntos (intervalo de $-$11,9 a $-$2,5) cuando la tasa va primero en el orden. Medido a través de un \emph{shock} del bono es menor y no se distingue de cero (3,7 puntos; intervalo de $-$8,9 a +0,6), porque el bono sube los inicios en el primer mes (+0,9 \%) y recién después los baja. Una lectura posible, que este trabajo no contrasta, es que un \emph{shock} del bono mezcla noticias sobre la actividad, que favorecen a la construcción, con el encarecimiento del crédito, mientras que la tasa hipotecaria refleja de manera más directa el costo del financiamiento. El bono agrega información: con él, el bloque financiero explica 7,6\% de la varianza de los inicios a 24 meses, contra 2\% en el sistema de dos variables. El resultado más útil para este trabajo es la prueba de exogeneidad por bloques: no se rechaza que los inicios no ayudan a predecir al par bono--tasa (p = 0,26), lo que respalda el supuesto de la función de transferencia.}
+
+\subsection{Los permisos de construcción}
+
+Si la respuesta de los inicios se demora porque antes hay que decidir, proyectar y obtener el permiso, los permisos deberían reaccionar antes. Se repitió todo el procedimiento con los permisos como \emph{output}. El modelo elegido tiene un retardo de un mes en lugar de dos, y la mitad del efecto se alcanza a los tres meses en lugar de cuatro. La ganancia es algo mayor, $-$0,57 (0,17), equivalente a 8,0 puntos por cada punto de tasa, dentro de un error estándar de la de los inicios. La relación es además más nítida, porque a diferencia de lo que pasa con los inicios, la correlación cruzada preblanqueada es significativa (p $<$ 0,001). La ventaja del retardo de un mes sobre el de dos es chica en términos de SBC (1,1 puntos), de modo que la evidencia sobre el adelanto es sugerente y no concluyente.
+
+\subsection{Costos de construcción y oferta}
+
+Los inicios dependen también de los costos y del stock de viviendas sin vender. Se agregó a la función de transferencia, de a uno, un segundo \emph{input}: el índice de precios de materiales de construcción, el de madera, y los meses de oferta de viviendas nuevas. Las hipótesis y las especificaciones se fijaron antes de estimar, y se informan los 45 modelos estimados. La ganancia de la tasa queda entre $-$0,36 y $-$0,46, siempre dentro de un error estándar de la original. Los costos tienen el signo esperado pero no son significativos (p = 0,15 para materiales y 0,14 para madera). Los meses de oferta sí lo son (p = 0,014), pero no son un buen control: la acumulación de viviendas sin vender es parte del canal por el que actúa la tasa, y los inicios la anticipan. Que la ganancia baje al incluirla indica que parte del efecto pasa por ahí, no que la estimación original estuviera sesgada.
+
+\subsection{Estabilidad en el tiempo}
+
+Por último, se dejó que la ganancia difiera según el período en que ocurre el cambio de la tasa. Es $-$0,49 en 1985--1999, $-$0,44 en 2000--2005, $-$0,83 en 2006--2011, $-$0,35 en 2012--2021 y $-$0,38 en 2022--2026. La igualdad de las cinco no se rechaza (razón de verosimilitud 1,60; p = 0,81) y un término adicional desde 2022 no es significativo (t = 0,48; p = 0,63). En estimaciones recursivas y con ventanas móviles de quince años la ganancia se mueve entre $-$0,84 y $-$0,36; los valores más negativos corresponden a ventanas que terminan entre 2010 y 2013. La única excepción visible es el colapso inmobiliario de 2006--2011, cuando la respuesta fue casi el doble. Este análisis se definió después de ver los resultados de las secciones 7.4 y 8, y debe leerse como exploratorio.
+
+\figura{16b_estabilidad.png}{1}{Ganancia recursiva y m\'ovil, y ganancia en cada especificaci\'on.}{fig:estabilidad}
+
+
+En conjunto, cuando el impulso es la tasa hipotecaria, el efecto de un punto porcentual queda entre 4,8 y 8,0 puntos en todas las variantes, con excepción de 2006--2011.
+
+\section{El episodio 2022--2024}
+
+Entre diciembre de 2021 y octubre de 2023 la tasa hipotecaria pasó de 3,10\% a 7,62\%. Es una prueba exigente para el modelo, más de cuatro puntos en menos de dos años. Se estimó la función de transferencia, con la forma de la sección 6, solo con datos hasta diciembre de 2021, y se pronosticaron los 36 meses siguientes de tres maneras: con la tasa efectivamente observada, con la tasa congelada en su valor de diciembre de 2021, y con el modelo univariado. La diferencia entre las dos primeras es el efecto que el modelo atribuye a la suba de tasas.
+
+\tabla{12_episodio.tex}{Inicios respecto del promedio de 2021: observado y pron\'osticos (\%).}{tab:episodio}
+
+
+Los parámetros anteriores a 2022 son casi iguales a los de la muestra completa (ganancia de $-$0,48 contra $-$0,45). El modelo acierta la dirección y el momento de la caída, y le gana con claridad al univariado, que pronosticaba una suba, pero sobreestima la magnitud. Para 2024 atribuye a la tasa una caída de 31,9 \% (intervalo de 95 \% de $-$45,8 a $-$14,3), mientras que los inicios observados fueron 14,6 \% menores que en 2021.
+
+\figura{16b_descomposicion.png}{0.95}{Episodio 2022--2024: qu\'e parte explica la tasa.}{fig:descomposicion}
+
+
+\tabla{16b_descomposicion.tex}{Descomposici\'on del episodio (promedio anual respecto de 2021, puntos logar\'itmicos).}{tab:descomposicion}
+
+
+Para leer esa diferencia, la variación observada se descompone en tres aportes que suman exactamente. En 2024, respecto de 2021 y en puntos logarítmicos: sin cambios de tasa los inicios habrían subido 3,3; la suba de tasas resta 38,4; y otros factores suman 19,3. El resultado es la caída observada de 15,7 puntos. Con los parámetros de toda la muestra los aportes son parecidos (3,8; $-$35,8; 16,3).
+
+La pregunta es si ese aporte de ``otros factores'' indica que la relación se rompió. La evidencia dice que no. El error del pronóstico a 36 meses equivale a 0,8 desvíos estándar del propio pronóstico, y el máximo error mensual, a 1,4: los 36 meses quedan dentro de la banda de 95 \%. Los errores a un paso de 2022--2024 no tienen sesgo (media de 0,66 con un desvío de 6,5; p = 0,54). Y, como se vio en la sección 7.5, la ganancia estimada para 2022--2026 no difiere de la del resto de la muestra. La caída fue menor que la predicha porque se acumularon perturbaciones positivas de tamaño normal y de otro origen. El modelo no identifica cuáles; los controles de la sección 7.4 dan cuenta de una parte, ya que con materiales y oferta la caída predicha para 2024 baja a 22,7\%.
+
+Dos advertencias acotan esta lectura. La primera es que, con datos hasta 2021, el parámetro de persistencia $\phi$ está mal identificado: su perfil de verosimilitud es casi plano y el máximo queda en el borde de la grilla (0,95). El valor de 0,75 no se rechaza (p = 0,26), pero con 0,95 la ganancia sería $-$1,64 y la caída atribuida a la tasa en 2024, de 60 \%. La magnitud del efecto en el episodio depende, por lo tanto, de un parámetro que los datos anteriores a 2022 determinan poco; el coeficiente de impacto $\delta_0$, en cambio, es estable. La segunda es que ``otros factores'' es un residuo: mide cuánto no explica la tasa, no qué lo explica.
+
+Se contrastaron dos explicaciones específicas, pensadas antes de estimar. La primera es que las subas de la tasa pesen menos que las bajas. Dentro de la muestra hay un indicio en esa dirección: la ganancia estimada es $-$0,17 para las subas y $-$1,02 para las bajas (p = 0,035), y algo similar ocurre si se separa por fase del ciclo de tasas (p = 0,025). Pero el resultado depende del valor de $\phi$ (p entre 0,008 y 0,154), el SBC prefiere el modelo lineal y, fuera de la muestra, el modelo asimétrico falla tanto como el lineal en sentido contrario: predice que los inicios de 2024 casi no cambian. La segunda es el efecto cerrojo (\emph{lock-in}): quienes tienen una hipoteca a tasa baja no venden, la oferta de viviendas usadas cae y la demanda se vuelca a la obra nueva. Se dejó que la ganancia dependa de la brecha entre la tasa vigente y una aproximación de la tasa media de las hipotecas existentes. El término no es significativo (t = 0,11) y, con datos hasta 2021, tiene el signo contrario al de la hipótesis. La prueba es débil, porque usa una aproximación en lugar del dato real y porque 33 de los 36 meses del episodio quedan fuera del rango de la brecha observado antes. Ninguna de las dos hipótesis puede darse por confirmada.
+
+\section{Conclusiones}
+
+Este trabajo midió la respuesta de los inicios de construcción de viviendas en Estados Unidos a la tasa hipotecaria con datos mensuales de 1985 a 2026. Las conclusiones son cuatro.
+
+La primera es la magnitud y la forma del efecto. Una suba de un punto porcentual de la tasa hipotecaria reduce los inicios alrededor de 6\%. El efecto empieza a los dos meses, llega a la mitad a los cuatro y se completa casi por entero en un año. Las tres hipótesis del marco económico se sostienen: el signo es negativo, la respuesta es gradual y los permisos reaccionan antes que los inicios.
+
+La segunda es que el resultado es robusto. Se mantiene en un VAR que no supone exogeneidad, al incorporar el bono a 10 años, con los permisos como variable dependiente, al controlar por costos y oferta, y por subperíodos. La excepción es 2006--2011, cuando la respuesta fue mayor.
+
+La tercera es metodológica. La relación entre los niveles de las dos series es espuria y no hay cointegración, de modo que el análisis correcto es en diferencias. La retroalimentación de los inicios hacia la tasa existe, tiene el signo que predice la teoría, pero es chica, no impide tratar a la tasa como exógena, y el VAR confirma que hacerlo no altera el resultado.
+
+La cuarta se refiere a 2022--2024. La suba de tasas explica la caída de los inicios. La diferencia con lo observado es de un tamaño que el modelo considera normal y no hay evidencia de un quiebre en la relación.
+
+El trabajo tiene límites que conviene dejar explícitos. El parámetro de persistencia está poco identificado antes de 2022, y de él depende la magnitud del efecto en el episodio. La varianza de las dos series no es constante y no se modeló. El VAR es sensible al número de rezagos y sus residuos no pasan la prueba conjunta de autocorrelación. Y lo que la tasa no explica en 2022--2024 queda como un residuo sin identificar. Tres extensiones ayudarían a cerrarlo: incorporar el precio de las viviendas para separar el canal de precios, distinguir viviendas unifamiliares de multifamiliares, y repetir la prueba del efecto cerrojo (lock-in) con la tasa media efectiva de las hipotecas existentes.
+
+\section*{Referencias}
+\begin{list}{}{\leftmargin=1.5em\itemindent=-1.5em\itemsep=3pt}
+\item Box, G., Jenkins, G., Reinsel, G. y Ljung, G. (2015). \emph{Time Series Analysis: Forecasting and Control} (5.ª ed.). Wiley.
+\item Brown, R. L., Durbin, J. y Evans, J. M. (1975). Techniques for testing the constancy of regression relationships over time. \emph{Journal of the Royal Statistical Society, Series B}, 37(2), 149--192.
+\item Chow, G. C. (1960). Tests of equality between sets of coefficients in two linear regressions. \emph{Econometrica}, 28(3), 591--605.
+\item Dickey, D. A. y Pantula, S. G. (1987). Determining the order of differencing in autoregressive processes. \emph{Journal of Business \& Economic Statistics}, 5(4), 455--461.
+\item Enders, W. (2015). \emph{Applied Econometric Time Series} (4.ª ed.). Wiley.
+\item Ferreira, F., Gyourko, J. y Tracy, J. (2010). Housing busts and household mobility. \emph{Journal of Urban Economics}, 68(1), 34--45.
+\item Gonçalves, S. y Kilian, L. (2004). Bootstrapping autoregressions with conditional heteroskedasticity of unknown form. \emph{Journal of Econometrics}, 123(1), 89--120.
+\item Granger, C. W. J. y Lee, T.-H. (1989). Investigation of production, sales and inventory relationships using multicointegration and non-symmetric error correction models. \emph{Journal of Applied Econometrics}, 4(S1), S145--S159.
+\item Granger, C. W. J. y Newbold, P. (1974). Spurious regressions in econometrics. \emph{Journal of Econometrics}, 2(2), 111--120.
+\item Greene, W. H. (2018). \emph{Econometric Analysis} (8.ª ed.). Pearson.
+\item Hallin, M., La Vecchia, D. y Liu, H. (2022). Center-outward R-estimation for semiparametric VARMA models. \emph{Journal of the American Statistical Association}, 117(538), 925--938.
+\item Haugh, L. D. (1976). Checking the independence of two covariance-stationary time series: a univariate residual cross-correlation approach. \emph{Journal of the American Statistical Association}, 71(354), 378--385.
+\item Hosking, J. R. M. (1980). The multivariate portmanteau statistic. \emph{Journal of the American Statistical Association}, 75, 602--608.
+\item MacKinnon, J. G. (2010). Critical values for cointegration tests. Queen\textquotesingle s Economics Department Working Paper 1227.
+\item Mayer, C. J. y Somerville, C. T. (2000). Residential construction: using the urban growth model to estimate housing supply. \emph{Journal of Urban Economics}, 48(1), 85--109.
+\item Pesaran, M. H., Shin, Y. y Smith, R. J. (2001). Bounds testing approaches to the analysis of level relationships. \emph{Journal of Applied Econometrics}, 16(3), 289--326.
+\item Poterba, J. M. (1984). Tax subsidies to owner-occupied housing: an asset-market approach. \emph{Quarterly Journal of Economics}, 99(4), 729--752.
+\item Quigley, J. M. (1987). Interest rate variations, mortgage prepayments and household mobility. \emph{Review of Economics and Statistics}, 69(4), 636--643.
+\item Sims, C. A. (1980). Macroeconomics and reality. \emph{Econometrica}, 48(1), 1--48.
+\item Topel, R. y Rosen, S. (1988). Housing investment in the United States. \emph{Journal of Political Economy}, 96(4), 718--740.
+\item U.S. Census Bureau (2017). \emph{X-13ARIMA-SEATS Reference Manual}, versión 1.1. Washington, DC.
+\end{list}
+
+\end{document}

@@ -26,17 +26,30 @@
 \input{../salidas/tablas/valores_05.tex}
 \input{../salidas/tablas/valores_06.tex}
 \input{../salidas/tablas/valores_07.tex}
+\input{../salidas/tablas/valores_08.tex}
+\input{../salidas/tablas/valores_09.tex}
+\input{../salidas/tablas/valores_10.tex}
+\input{../salidas/tablas/valores_11.tex}
+\input{../salidas/tablas/valores_12.tex}
+\input{../salidas/tablas/valores_13.tex}
+\input{../salidas/tablas/valores_14.tex}
+\input{../salidas/tablas/valores_15.tex}
+\input{../salidas/tablas/valores_16.tex}
+\input{../salidas/tablas/valores_16b.tex}
 
 \newcommand{\nota}[2]{\textit{(Nota~#1, Sec.~#2)}}
 \newcommand{\tabla}[3]{\begin{table}[H]\centering\small\begin{adjustbox}{max width=\linewidth}\input{../salidas/tablas/#1}\end{adjustbox}\caption{#2}\label{#3}\end{table}}
 \newcommand{\salida}[3]{\begin{figure}[H]\centering\includegraphics[width=#2\linewidth]{#1}\caption{#3}\end{figure}}
+\newcommand{\dos}[3]{\begin{figure}[H]\centering\includegraphics[width=0.49\linewidth]{#1}\hfill\includegraphics[width=0.49\linewidth]{#2}\caption{#3}\end{figure}}
+\newcommand{\parte}[1]{\bigskip\begin{center}\large\bfseries #1\end{center}}
+\newcommand{\sinverificar}{\textsuperscript{\textcolor{red}{[sin verificar]}}}
 
 \title{\textbf{Inicios de viviendas y tasa hipotecaria en EE.UU.}\\[3pt]
-\large Trabajo pr\'actico de Econometr\'ia II}
+\large Trabajo pr\'actico de Econometr\'ia II --- compilado de resultados}
 \author{Paulo Gonzalez\\ \small C\'atedra Mirta L.\ Gonz\'alez --- FCE-UBA}
-\date{Octubre de 2026}
+\date{Noviembre de 2026}
 
-\begin{document}
+\begin{document}\sloppy
 \maketitle
 
 \section*{Resumen}
@@ -46,7 +59,17 @@
 \item \textbf{Inicios.} $(1-B)(1-B^{12})$ y ARIMA$(0,1,1)(0,1,1)_{12}$ con at\'ipico en 2020-04.
 \item \textbf{Tasa.} $(1-B)$ y ARIMA$(0,1,1)$.
 \item \textbf{Relaci\'on.} Espuria en niveles. Filtrada: elasticidad a 12 meses $\ElasDoce$ (ee $\ElasDoceee$), unos $\PPDoce\%$ de inicios por +1\,pp de tasa. Hay retroalimentaci\'on.
+\item \textbf{Intervenci\'on.} COVID (2020-04) como cambio transitorio, $\delta=\IntDelta$.
+\item \textbf{Funci\'on de transferencia} (modelo principal). Retardo de 2 meses, decaimiento $\phi=0{,}75$, ganancia $\TFTasaGan$ (ee $\TFTasaGanEE$): $\TFTasaPP\%$ de inicios por +1\,pp. La tasa se trata como ex\'ogena (ning\'un chequeo de $k<0$ rechaza en conjunto).
+\item \textbf{VAR bivariado} (control). $\VARelasPPDoce\%$ por +1\,pp sin imponer exogeneidad; retroalimentaci\'on chica.
+\item \textbf{Cointegraci\'on.} No hay relaci\'on de largo plazo robusta (EG, Johansen y PSS): se trabaja en diferencias, sin VEC.
+\item \textbf{Episodio 2022--24.} Con datos hasta 2021, el modelo atribuye a la tasa $\EpEfectoTres\%$ en 2024; lo observado fue $\EpObsTres\%$. El error es de tama\~no normal ($\DesErrTreintaSeisAnte$ desv\'ios a 36 meses): no hay quiebre.
+\item \textbf{Robustez.} VAR trivariado con el bono ($\TRIelasAltPPDoce\%$), permisos ($\TFPPermPP\%$, un mes antes), controles de costos y oferta (de $\CtlMatOfePP$ a $\CtlMadPP\%$) y subper\'iodos (igualdad de ganancias, $p=\EstLRp$).
+\item \textbf{No confirmado.} Asimetr\'ia (subas contra bajas) y \emph{lock-in}.
 \end{itemize}
+
+%######################################################################
+\parte{Primera parte: cada serie y la relaci\'on}
 
 %======================================================================
 \section{Objetivo y datos}
@@ -76,7 +99,7 @@ Tasa hipotecaria fija 30 a\~nos & MORTGAGE30US & \% anual & semanal $\to$ promed
 
 %======================================================================
 \section{Estacionalidad}
-\tabla{02_estacionalidad.tex}{$\Delta$ de cada serie sobre 11 dummies mensuales centradas. Cambio de patr\'on: mes $\times$ subper\'iodo (1985--2007 vs.\ 2008--2026).}{tab:estac}
+\tabla{02_estacionalidad.tex}{$\Delta$ de cada serie sobre 11 variables binarias mensuales. Cambio de patr\'on: mes $\times$ subper\'iodo (1985--2007 vs.\ 2008--2026).}{tab:estac}
 \begin{itemize}
 \item \textbf{Inicios:} estacionalidad fuerte ($F=\EstFv$, $R^2=\EstRv$) y patr\'on que cambia ($F=\EstFcv$, $p\ \EstPcv$) $\Rightarrow$ estoc\'astica $\Rightarrow$ $(1-B^{12})$ \nota{6}{2.3}.
 \item \textbf{Tasa:} sin estacionalidad ($p=\EstPt$).
@@ -124,7 +147,7 @@ Esquema descendente (Dickey--Pantula): primero $\Delta$, despu\'es el nivel ($\t
 Mismas fechas (desde 1986-02); los SBC son comparables porque todo $F(B)$ con $F(0)=1$ tiene jacobiano unitario.
 \tabla{04_filtros.tex}{Mejor modelo admisible por filtro.}{tab:filtros}
 \begin{itemize}
-\item \textbf{Gana $(1-B)(1-B^{12})$}: $\FiltroDSBCdos$ puntos sobre F2 y $\FiltroDSBCuno$ sobre dummies fijas.
+\item \textbf{Gana $(1-B)(1-B^{12})$}: $\FiltroDSBCdos$ puntos sobre F2 y $\FiltroDSBCuno$ sobre binarias mensuales fijas.
 \item F2 necesita un AR(1) con ra\'iz $\FiltroDosRaizAR$: la ra\'iz unitaria que falta.
 \end{itemize}
 
@@ -213,7 +236,7 @@ Estimaci\'on 1985--2017, evaluaci\'on 2018--2019 ($\NEval$ or\'igenes m\'oviles,
 \subsection{Niveles: regresi\'on espuria}
 \tabla{07_alarma.tex}{Regresiones de $\ln$ inicios sobre $\ln$ tasa.}{tab:alarma}
 \begin{itemize}
-\item \textbf{Niveles:} pendiente positiva ($t=\NivT$), signo equivocado; $d_W=\NivDW$. Con dummies, $R^2=\DumR>d_W=\DumDW$.
+\item \textbf{Niveles:} pendiente positiva ($t=\NivT$), signo equivocado; $d_W=\NivDW$. Con variables binarias, $R^2=\DumR>d_W=\DumDW$.
 \item \textbf{Filtradas:} la relaci\'on contempor\'anea desaparece ($R^2=\FilR$).
 \end{itemize}
 \salida{07_reg_niveles.png}{0.72}{Regresi\'on en niveles.}
@@ -223,7 +246,7 @@ Residuos de los dos modelos univariados; banda $\pm\BandaCC$; $S=n\sum_{-M}^{M}r
 \salida{07_relacion.png}{1}{Izquierda: correlaci\'on cruzada de las innovaciones. Derecha: respuesta acumulada.}
 \tabla{07_haugh.tex}{Test de Haugh. Las dos \'ultimas columnas separan la direcci\'on ($M=12$).}{tab:haugh}
 \begin{itemize}
-\item \textbf{No son independientes} ($M=6$: $p\ \HaughSeisP$).
+\item \textbf{Las innovaciones están correlacionadas} ($M=6$: $p\ \HaughSeisP$).
 \item \textbf{Direcci\'on:} en toda la muestra domina tasa $\to$ inicios ($k>0$: $p=\HaughDocePos$), con correlaciones negativas a 3, 5 y 6 meses.
 \item \textbf{Retroalimentaci\'on:} inicios $\to$ tasa no es significativa en conjunto ($k<0$: $p=\HaughDoceNeg$), pero $r_{-1}=0{,}15$ s\'i lo es, y en 1986--2007 la direcci\'on es significativa ($p=0{,}043$).
 \end{itemize}
@@ -238,16 +261,271 @@ $F(B)=(1-B)(1-B^{12})$ en ambas series: $F(B)x_t=v(B)F(B)y_t+F(B)n_t$, con $v(B)
 \item Errores est\'andar orientativos ($d_W=\RDdw$): corresponde funci\'on de transferencia (segunda parte).
 \end{itemize}
 
+%######################################################################
+\parte{Segunda parte: intervenci\'on, funci\'on de transferencia y VAR}
+
 %======================================================================
-\section{Limitaciones y pasos siguientes}
+\section{Intervenci\'on: COVID (abril de 2020)}\label{sec:interv}
+\textbf{M\'etodo} (apunte, parte 2, pp.~1--7). Sobre el modelo de l\'ineas a\'ereas, con $Z_t$ pulso en 2020-04:
+\[x_t=\omega\,\xi(B)Z_t+N_t,\qquad (1-B)(1-B^{12})N_t=(1-\theta B)(1-\Theta B^{12})a_t;\]
+\[\text{AO: }\xi=1;\qquad \text{TC: }\xi=\frac{1}{1-\delta B};\qquad \text{LS: }\xi=\frac{1}{1-B}.\]
+$\delta$ por perfil de verosimilitud; la forma, por SBC contando $\delta$ como par\'ametro. Efecto en el nivel $j$ meses despu\'es: $\omega\delta^j$ (TC).
+\tabla{08_formas.tex}{Formas de la intervenci\'on dentro del modelo de l\'ineas a\'ereas.}{tab:formas}
+\salida{08_intervencion.png}{1}{Izquierda: respuesta de los inicios (\% del nivel) seg\'un la forma. Derecha: perfil de verosimilitud de $\delta$.}
 \begin{itemize}
-\item \textbf{Exogeneidad:} hay retroalimentaci\'on de corto plazo (inicios $\to$ tasa a un mes). Opciones: VAR, que trata a ambas como end\'ogenas, o el bono a 10 a\~nos como causa.
-\item \textbf{Intervenciones:} 2020-04 (inicios); 2008-12, 2013-06 y 2022 (tasa).
-\item \textbf{Varianza:} heterocedasticidad en ambas series; colas pesadas en la tasa.
-\item \textbf{Estacionalidad:} la ra\'iz estacional se decidi\'o por correlograma y SBC (HEGY fuera del programa).
+\item \textbf{Gana el cambio transitorio}, $\delta=\IntDelta$ ($\Delta$SBC frente al pulso: $\IntDSBCAO$; frente al escal\'on: $\IntDSBCLS$). El escal\'on se descarta: el cierre no dej\'o un cambio permanente de nivel.
+\item \textbf{Impacto} $\hat\omega=\IntOmegaTC$ ($t=\IntTTC$): $\IntImpactoPct\%$ de inicios en abril, $\IntTresPct\%$ a los tres meses, $\IntSeisPct\%$ a los seis; vida media $\IntVidaMedia$ meses.
+\item \textbf{P\'erdida acumulada} $\IntPerdidaMeses$: el equivalente a un mes entero de inicios, concentrado entre abril y julio de 2020.
+\end{itemize}
+\tabla{08_trayectoria.tex}{Trayectoria del efecto del COVID (TC, $\delta=\IntDelta$). Un efecto $e$ en $100\ln$ equivale a $100(e^{e/100}-1)\%$ de inicios.}{tab:trayectoria}
+
+%======================================================================
+\section{Funci\'on de transferencia}\label{sec:mft}
+\textbf{M\'etodo} (apunte, parte 2, pp.~8--21: preblanqueo en seis pasos). Input $X=(1-B)100\ln$ tasa; output $Y=(1-B)100\ln$ inicios \emph{desestacionalizados} (misma diferenciaci\'on que el input, para que $v(B)$ se lea como elasticidad). COVID como TC con el $\delta$ de la Secci\'on~\ref{sec:interv}.
+\begin{enumerate}[nosep]
+\item ARMA del input por rejilla y SBC: MA(1); innovaciones $\alpha_t$.
+\item Mismo filtro sobre $Y$ (sin el efecto COVID): $\beta_t$.
+\item FCC $r(k)=\mathrm{corr}(\alpha_t,\beta_{t+k})$, bandas $\pm2/\sqrt n$, pesos $\hat v_k=(s_\beta/s_\alpha)r(k)$.
+\item[4--5.] $Y_t=c+\dfrac{\delta(B)B^b}{(1-\phi B)^r}X_t+\omega\,TC_t+N_t$, $(b,s,r)$ por SBC ($b\le3$, $s\le3$, $r\in\{0,1\}$), $\phi$ por perfil; se re-identifica el ruido.
+\item[6.] Residuos ruido blanco y sin correlaci\'on cruzada con $\alpha$.
+\end{enumerate}
+Modelo elegido ($b=2$, $s=0$, $r=1$):
+\[Y_t=c+\frac{\delta_0}{1-\phi B}\,X_{t-2}+\omega\,TC_t+N_t,\qquad (1-\phi_1B)(1-\Phi_1B^{12})N_t=(1+\vartheta_1B+\vartheta_2B^2)(1+\Theta_1B^{12})e_t,\]
+pesos $v_j=\delta_0\phi^{\,j-2}$ ($j\ge2$), ganancia $g=\delta_0/(1-\phi)$.
+\begin{table}[H]\centering\small
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lcc}
+\toprule
+ & Tasa hipotecaria 30 a\~nos & Bono del Tesoro 10 a\~nos \\
+\midrule
+Filtro de preblanqueo del input & \TFTasaFiltro & \TFBonoFiltro \\
+FCC preblanqueada, $k=0..12$ (input anticipa): $p$ conjunto & \TFTasaPos & \TFBonoPos \\
+FCC preblanqueada, $k=-12..-1$ (retroalimentaci\'on): $p$ conjunto & \TFTasaNeg & \TFBonoNeg \\
+FCC fuera de banda ($\pm\TFBanda$) & \TFTasaSig & \TFBonoSig \\
+Funci\'on de transferencia elegida & \TFTasaEsp, $\phi=0{,}75$ & \TFBonoEsp, $\phi=0{,}65$ \\
+Ruido & \TFTasaRuido & \TFBonoRuido \\
+\textbf{Ganancia $g$ (ee)} & \textcolor{red}{$\TFTasaGan$ ($\TFTasaGanEE$)} & $\TFBonoGan$ ($\TFBonoGanEE$) \\
+\textbf{\% de inicios por +1 pp del input} & \textcolor{red}{$\TFTasaPP$} & $\TFBonoPP$ \\
+Residuos vs.\ $\alpha$, $k<0$: $p$ & \TFTasaCCneg & \TFBonoCCneg \\
+$\Delta$SBC frente al modelo sin input & $\TFTasaDSBC$ & $\TFBonoDSBC$ \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\caption{Funci\'on de transferencia: tasa y bono como input.}\label{tab:mft}
+\end{table}
+\salida{09_transferencia.png}{1}{Izquierda: FCC de input y output preblanqueados ($k>0$: el input anticipa; $k<0$: retroalimentaci\'on). Derecha: pesos $v_j$ emp\'iricos (barras) y del modelo (rojo).}
+\tabla{09_seleccion_tasa.tex}{Tasa: las seis especificaciones de menor SBC en la b\'usqueda; despu\'es se refina $\phi$ (paso 0,05) y se re-identifica el ruido.}{tab:selmft}
+\tabla{09_robustez_ruido.tex}{Ganancia con la misma funci\'on de transferencia y distintos ruidos. Solo el elegido deja residuos blancos.}{tab:robruido}
+\begin{itemize}
+\item \textbf{Tasa:} retardo $b=2$ y decaimiento $\phi=0{,}75$. $g=\TFTasaGan$ (ee $\TFTasaGanEE$, con la incertidumbre de $\phi$; condicional en $\phi$, $\TFTasaGanEEcond$): $\TFTasaPP\%$ de inicios por +1\,pp. La tasa baja el SBC en $\TFTasaDSBC$ puntos.
+\item \textbf{Robustez al ruido:} ganancia entre $\TFRobMax$ y $\TFRobMin$ ($\TFRobPPMin$ a $\TFRobPPMax\%$ por pp), siempre significativa.
+\item \textbf{Bono:} aporta poco y su especificaci\'on no es robusta.
+\end{itemize}
+\begin{table}[H]\centering\small
+\begin{tabular}{lc}
+\toprule
+Chequeo de inicios $\to$ tasa ($k<0$) & $p$ conjunto \\
+\midrule
+FCC del preblanqueo (paso 3) & $\TFTasaNeg$ \\
+Correlaci\'on cruzada residuos--input $\alpha_t$ (paso 6) & $\TFTasaCCneg$ \\
+Haugh, innovaciones univariadas (Secci\'on~\ref{sec:relacion}) & $\HaughDoceNeg$ \\
+\bottomrule
+\end{tabular}
+\caption{Exogeneidad de la tasa: ninguno rechaza al 5\%.}\label{tab:exog}
+\end{table}
+\begin{itemize}
+\item \textbf{Exogeneidad:} ning\'un chequeo rechaza en conjunto. Se\~nales menores: $r_{-1}$ fuera de banda y Haugh $k<0$ con $p=0{,}043$ en 1986--2007. Retroalimentaci\'on de corto plazo, d\'ebil e inestable. La tasa sigue al bono a 10 a\~nos, que los inicios dif\'icilmente muevan. $\Rightarrow$ MFT aplicable; VAR como control.
 \end{itemize}
 
-\medskip\noindent\textit{Fuentes:} U.S.\ Census Bureau, Freddie Mac PMMS, FRED. Teor\'ia: Notas 1 a 6 y apunte de la c\'atedra.
+%======================================================================
+\section{VAR bivariado (control de robustez)}\label{sec:var}
+\textbf{M\'etodo} (apunte, parte 2, pp.~22--48; Enders, cap.~5). $X_t=(\Delta100\ln\text{tasa},\ \Delta100\ln\text{inicios SA})'$; ex\'ogenas: constante y COVID (TC). Programado a mano.
+\begin{itemize}[nosep]
+\item Rezagos: AIC, SBC, HQ y LR secuencial con correcci\'on de Sims, misma muestra para $p\le13$; se suben hasta residuos blancos por ecuaci\'on.
+\item MCO ecuaci\'on por ecuaci\'on, sin eliminar rezagos (Sims). Cholesky con la tasa primero.
+\item Impulso-respuesta acumulada (nivel, \%), bandas por \emph{wild bootstrap} (Gon\c{c}alves y Kilian, 2004), $\VARboot$ r\'eplicas; orden inverso como sensibilidad. Granger y descomposici\'on de varianza.
+\end{itemize}
+\[X_t=A_0+\sum_{i=1}^{p}A_iX_{t-i}+C\,TC_t+e_t,\qquad E(e_te_t')=\Sigma=PP',\qquad \text{respuesta en nivel}=\sum_{i\le h}\Phi_iP.\]
+\tabla{10_rezagos.tex}{Elecci\'on de rezagos. En rojo, el $p$ de cada criterio y el elegido.}{tab:varp}
+\tabla{10_diagnostico.tex}{Diagn\'ostico de residuos del VAR($\VARp$).}{tab:vardiag}
+\salida{10_irf.png}{1}{Impulso-respuesta en niveles (acumulada, \%). Shocks de un desv\'io; banda bootstrap 95\%; punteado: orden inverso.}
+\tabla{10_irf.tex}{Respuestas acumuladas (\%) con IC 95\% bootstrap; en rojo, las que excluyen el cero.}{tab:varirf}
+\tabla{10_sensibilidad_p.tex}{Sensibilidad al n\'umero de rezagos (respuestas acumuladas a 12 meses).}{tab:varsens}
+\tabla{10_granger.tex}{Causalidad de Granger.}{tab:vargr}
+\tabla{10_fevd.tex}{Descomposici\'on de la varianza del error de pron\'ostico.}{tab:varfevd}
+\begin{itemize}
+\item \textbf{Rezagos:} SBC $\VARpSBC$, HQ $\VARpHQ$, AIC $\VARpAIC$, LR $\VARpLR$; se sube a $p=\VARp$, el primero con residuos blancos en ambas ecuaciones. Estable (m\'odulo m\'aximo $\VARmodmax$). Portmanteau multivariado rechaza ($p=\VARpm$).
+\item \textbf{Correlaci\'on de residuos} $\VARrho$: el orden de Cholesky casi no importa.
+\item \textbf{Efecto:} shock de tasa de un desv\'io ($\approx\VARshockTasaPP$\,pp) $\Rightarrow$ inicios $\VARvivTasaDoce\%$ a 12 meses (IC [$\VARvivTasaLoDoce$; $\VARvivTasaHiDoce$]). Por +1\,pp: $\VARelasPPDoce\%$ (FT: $\TFTasaPP\%$).
+\item \textbf{Sensibilidad a $p$:} con $p\le3$ el efecto es chico y no significativo, pero esos VAR dejan autocorrelaci\'on en los inicios. Desde $p=5$: $\VARsensPPCinco\%$ ($p=5$), $\VARsensPPNueve\%$ ($p=9$), $\VARsensPPDoce\%$ ($p=12$).
+\item \textbf{Retroalimentaci\'on:} la tasa sube $\VARtasaVivDoce\%$ a 12 meses ante un shock de inicios (IC [$\VARtasaVivLoDoce$; $\VARtasaVivHiDoce$]). Granger: tasa $\to$ inicios $p=\VARgrTasaViv$; inicios $\to$ tasa $p=\VARgrVivTasa$. Varianza explicada a 24 meses: $\VARfevdViv\%$ y $\VARfevdTasa\%$. Existe pero es chica.
+\end{itemize}
+
+%######################################################################
+\parte{Tercera parte: extensiones}
+
+%======================================================================
+\section{Cointegraci\'on}\label{sec:coint}
+\textbf{M\'etodo} (apunte, parte 2, pp.~49--60). Niveles: $100\ln$ inicios SA y $100\ln$ tasa, 1985--2026. $H_0$ en las tres pruebas: no hay cointegraci\'on.
+\begin{itemize}[nosep]
+\item \textbf{Engle--Granger:} regresi\'on en niveles y ADF de los residuos (0, 4, 12 y SBC rezagos); valores cr\'iticos de MacKinnon (2010).
+\item \textbf{Johansen:} traza y $\lambda_{\max}$, constante restringida, COVID como ex\'ogena, $K=2,3,4,10$.
+\item \textbf{Bandas de PSS} (Pesaran, Shin y Smith, 2001): $F$ sobre los niveles rezagados en el ARDL; caso III, $k=1$; cotas de los cuadros CI(iii) y CII(iii), pp.~300 y 303.
+\end{itemize}
+\tabla{11_eg.tex}{Engle--Granger.}{tab:eg}
+\tabla{11_johansen.tex}{Johansen por n\'umero de rezagos $K$.}{tab:joh}
+\tabla{11_pss.tex}{Test de bandas (PSS).}{tab:pss}
+\salida{11_cointegracion.png}{1}{Series en niveles y residuo de la regresi\'on de largo plazo.}
+\begin{itemize}
+\item \textbf{EG:} pendiente $+\EGBeta$ (signo contrario al esperado), $R^2=\EGRdos>d_W=\EGDW$. $\tau$ entre $\EGTauMin$ y $\EGTauMax$ contra $\EGVCcinco$ al 5\%: no rechaza. Invertida (tasa sobre inicios): tampoco.
+\item \textbf{Johansen:} la traza rechaza por poco solo con $K=\JohKRechaza$ ($\JohTrazaSBC$ contra $\JohTrazaVC$ con $K=3$); $\lambda_{\max}$ no ($\JohEigSBC$ contra $\JohEigVC$). Sin las variables COVID, traza entre $\JohSinCovidMin$ y $\JohSinCovidMax$: no rechaza con ning\'un $K$.
+\item \textbf{El vector no tiene sentido econ\'omico:} coeficiente de la tasa $+\JohBetaTasa$ y $\alpha$ de los inicios $+\JohAlfaInicios$ (no corrigen el desv\'io).
+\item \textbf{PSS:} $F=\PSSF$, debajo de la cota inferior ($\PSSCotaInf$); con 12 rezagos, $F=\PSSFdoce$.
+\item \textbf{Conclusi\'on:} no hay relaci\'on de largo plazo robusta $\Rightarrow$ diferencias, sin VEC.
+\end{itemize}
+
+%======================================================================
+\section{Episodio 2022--2024: pron\'ostico fuera de muestra}\label{sec:episodio}
+\textbf{M\'etodo.} Funci\'on de transferencia con la forma de la Secci\'on~\ref{sec:mft} (forma fija), par\'ametros estimados \emph{solo con datos hasta 2021-12}. Pron\'ostico de 36 meses (Box, Jenkins, Reinsel y Ljung, 2015, cap.~12) con la tasa observada (condicional), con la tasa congelada en dic-2021 (contraf\'actico) y con el univariado. Efecto de la tasa = condicional $-$ contraf\'actico.
+\tabla{12_parametros.tex}{Par\'ametros con toda la muestra y hasta 2021-12.}{tab:eppar}
+\tabla{12_episodio.tex}{Inicios respecto del promedio de 2021 (\%).}{tab:ep}
+\salida{12_episodio.png}{0.95}{Pron\'osticos desde 2021-12 contra lo observado.}
+\begin{itemize}
+\item \textbf{Tasa:} de $\EpTasaIni\%$ (dic-2021) a $\EpTasaMax\%$ ($\EpTasaMaxMes$).
+\item \textbf{Par\'ametros estables:} ganancia hasta 2021 $\EpGanSub$ (ee $\EpGanSubEE$) contra $\EpGanTot$ con toda la muestra.
+\item \textbf{Efecto de la tasa en 2024:} $\EpEfectoTres\%$ (IC [$\EpEfectoLoTres$; $\EpEfectoHiTres$]) contra $\EpObsTres\%$ observado. Promedio 2022--24: $\EpEfectoTrienio\%$ contra $\EpObsTrienio\%$. La ca\'ida observada es el $\EpFraccion\%$ de la atribuida a la tasa.
+\item \textbf{Le gana al univariado:} RMSE a 36 meses $\EpRMSECond$ contra $\EpRMSEUni$. Los $\EpDentroBanda$ meses quedan dentro de la banda del 95\% (muy ancha).
+\item \textbf{Fragilidad de $\phi$:} hasta 2021 el perfil es casi plano y su m\'aximo est\'a en el borde ($\EpPhiSub$); LR de $\phi=0{,}75$: $\EpPhiLR$ ($p=\EpPhiLRp$). Con $\phi=0{,}95$: ganancia $\EpGanPhiSub$ y efecto en 2024 de $\EpEfectoPhiTres\%$.
+\end{itemize}
+
+%======================================================================
+\section{VAR trivariado: bono, tasa e inicios}\label{sec:tri}
+\textbf{M\'etodo.} Como la Secci\'on~\ref{sec:var}, con $\Delta100\ln$ del bono a 10 a\~nos primero (orden bono $\to$ tasa $\to$ inicios) y el orden tasa $\to$ bono $\to$ inicios como sensibilidad. VAR($\TRIp$), $\TRImuestra$ ($T=\TRIT$); AIC, HQ y LR dan $\TRIpLR$, SBC $\TRIpSBC$; se sube hasta residuos blancos. Exogeneidad por bloques: LR con correcci\'on de Sims (Enders, cap.~5).
+\tabla{13_comparacion.tex}{\% de inicios por +1\,pp de tasa seg\'un el modelo.}{tab:tricomp}
+\salida{13_irf.png}{1}{Impulso-respuesta acumulada de los inicios (\%), banda bootstrap 95\%.}
+\tabla{13_granger.tex}{Causalidad de Granger y exogeneidad por bloques.}{tab:trigr}
+\tabla{13_fevd.tex}{Descomposici\'on de varianza.}{tab:trifevd}
+\tabla{13_sensibilidad.tex}{Sensibilidad al n\'umero de rezagos.}{tab:trisens}
+\begin{itemize}
+\item \textbf{Bono y tasa se mueven juntos:} correlaci\'on de residuos $\TRIrhoBonoTasa$ (con inicios: $\TRIrhoBonoViv$ y $\TRIrhoTasaViv$). Estable (m\'odulo $\TRImodmax$).
+\item \textbf{Con la tasa primero:} $\TRIelasAltPPDoce\%$ por +1\,pp a 12 meses (IC [$\TRIelasAltLoDoce$; $\TRIelasAltHiDoce$]). Coincide con la FT ($\TFTasaPP$) y el bivariado ($\VARelasPPDoce$).
+\item \textbf{V\'ia shock de bono:} $\TRIelasBonoPPDoce\%$ (IC [$\TRIelasBonoLoDoce$; $+\TRIelasBonoHiDoce$], incluye el cero): el bono sube los inicios en el mes 1 ($+0{,}93$, IC [0,12; 1,66]) y reci\'en despu\'es los baja.
+\item \textbf{Margen propio de la tasa:} inicios $\TRIvivTasaDoce\%$ a 12 meses (IC [$\TRIvivTasaLoDoce$; $\TRIvivTasaHiDoce$]).
+\item \textbf{Bloque financiero:} explica $\TRIfevdVivFin\%$ de la varianza de los inicios a 24 meses (bono $\TRIfevdVivBono$, margen $\TRIfevdVivTasa$). Granger: bono $\to$ inicios $p\ \TRIgrBonoViv$, tasa $\to$ inicios $p=\TRIgrTasaViv$; inicios $\to$ bono $p=\TRIgrVivBono$, inicios $\to$ tasa $p=\TRIgrVivTasa$. \textbf{Exogeneidad por bloques} (inicios no causan a bono--tasa): $p=\TRIgrVivBloque$, no se rechaza: respalda la FT.
+\item \textbf{Fragilidad:} con $p=1$ o 2 (los de los criterios) el efecto v\'ia bono cambia de signo y los residuos de inicios no son blancos; el portmanteau rechaza ($p=\TRIpm$).
+\end{itemize}
+
+%======================================================================
+\section{Permisos de construcci\'on como output}\label{sec:permisos}
+\textbf{M\'etodo.} $100\ln(\text{PERMIT}/12)$, 1985--2026; mismo procedimiento que la Secci\'on~\ref{sec:mft}. Hip\'otesis: los permisos reaccionan antes que los inicios.
+\tabla{14_univariado.tex}{Permisos: orden de integraci\'on, ruido e intervenci\'on.}{tab:permuni}
+\tabla{14_transferencia.tex}{Funci\'on de transferencia: permisos e inicios, cada uno con su forma y con la del otro.}{tab:permft}
+\salida{14_permisos.png}{1}{Permisos: FCC preblanqueada y pesos $v_j$.}
+\begin{itemize}
+\item \textbf{Orden y ruido:} $I(1)$ (ADF nivel $\PermADFNivel$, $p=\PermADFNivelP$; diferencia $\PermADFDif$). Ruido \PermRuidoUni; COVID como TC ($\delta=\PermDelta$, $\hat\omega=\PermOmega$).
+\item \textbf{Reaccionan un mes antes:} $b=\TFPPermB$ contra $b=\TFPIniB$; la mitad del efecto a los $\TFPPermMitad$ meses (inicios: $\TFPIniMitad$). La ventaja de $b=1$ en SBC es chica ($\TFPPermDSBCFormaIni$).
+\item \textbf{Ganancia} $\TFPPermGan$ (ee $\TFPPermGanEE$): $\TFPPermPP\%$ por +1\,pp (inicios: $\TFPIniPP$), dentro de un error est\'andar.
+\item \textbf{Relaci\'on m\'as n\'itida:} FCC $k\ge0$ con $p\ \TFPPermPos$; picos en \TFPPermSig. $\Delta$SBC contra el modelo sin input: $\TFPPermDSBC$. Sin retroalimentaci\'on ($k<0$: $p=\TFPPermNeg$).
+\end{itemize}
+
+%======================================================================
+\section{Costos y oferta como controles}\label{sec:controles}
+\textbf{M\'etodo.} La FT de la Secci\'on~\ref{sec:mft}, con la forma de la tasa fija y un segundo input: materiales de construcci\'on (WPUSI012011), madera (WPU081), meses de oferta de vivienda nueva (MSACSR, en diferencias: ADF $\CtlOfertaADF$, $p=\CtlOfertaADFp$) y salarios de la construcci\'on (CES2000000003, desde $\CtlSalDesde$). Forma de cada control por SBC con rezago m\'inimo 1. Hip\'otesis preregistradas; $\CtlModelos$ modelos estimados.
+\tabla{15_controles.tex}{Ganancia de la tasa con cada control.}{tab:ctl}
+\tabla{15_episodio_controles.tex}{Episodio 2022--24 con controles (datos hasta 2021-12; inicios respecto de 2021, \%).}{tab:ctlep}
+\salida{15_costos.png}{1}{Controles: costos y meses de oferta.}
+\begin{itemize}
+\item \textbf{H1, el efecto de la tasa sobrevive:} se sostiene. Ganancia entre $\CtlMatOfeGan$ y $\CtlMadGan$ (base $\CtlGanBase$); cambia $\CtlMatCambioEE$ ee con materiales y $\CtlOfeCambioEE$ con oferta.
+\item \textbf{H2, costos m\'as altos, menos inicios:} signo correcto, no significativa (materiales $p=\CtlMatWald$, madera $p=\CtlMadWald$). El SBC empeora ($+\CtlMatDSBC$).
+\item \textbf{Oferta:} significativa ($p=\CtlOfeWald$) pero es parte del canal de la tasa (mal control) y los inicios la anticipan.
+\item \textbf{H3, los controles reducen la sobrepredicci\'on de 2022--24:} en parte. 2024: base $\CtlBaseEpTres\%$, con materiales y oferta $\CtlMatOfeEpTres\%$, observado $\CtlObsTres\%$. RMSE de $\CtlBaseRMSE$ a $\CtlMatOfeRMSE$.
+\item \textbf{Salarios:} muestra corta y salto por composici\'on en 2020-04; no se interpretan.
+\end{itemize}
+
+%======================================================================
+\section{Asimetr\'ia y \emph{lock-in}}\label{sec:asim}
+\textbf{M\'etodo.} Hip\'otesis preregistradas, $\AsLkModelos$ modelos; todas se informan.
+\begin{itemize}[nosep]
+\item \textbf{Asimetr\'ia:} el input se separa en subas y bajas mensuales (sumas parciales; Granger y Lee, 1989; Shin, Yu y Greenwood-Nimmo, 2014), cada una con su ganancia; tambi\'en grandes contra chicos.
+\item \textbf{\emph{Lock-in}:} la ganancia se modula con la brecha entre la tasa vigente y la de la cartera (Quigley, 1987; Ferreira, Gyourko y Tracy, 2010). Sin acceso al dato de FHFA, la tasa de la cartera se aproxima con promedios de 60 y 84 meses y pesos exponenciales de MORTGAGE30US. Tambi\'en por r\'egimen (brecha positiva contra negativa; Tong, 1990).
+\end{itemize}
+\tabla{16_asimetria.tex}{Asimetr\'ia: subas contra bajas y grandes contra chicos.}{tab:asim}
+\tabla{16_lockin.tex}{\emph{Lock-in} con la brecha sustituta.}{tab:lock}
+\tabla{16_episodio_variantes.tex}{Episodio 2022--24 con cada variante (datos hasta 2021-12).}{tab:asimep}
+\salida{16_lockin.png}{1}{Brecha sustituta y rango de estimaci\'on.}
+\begin{itemize}
+\item \textbf{Asimetr\'ia, en la direcci\'on esperada pero fr\'agil:} con $\phi=0{,}75$, subas $\AsGanPos$ (ee $\AsGanPosEE$) contra bajas $\AsGanNeg$ (ee $\AsGanNegEE$), $p=\AsWald$. Seg\'un $\phi$, $p$ entre $\AsWaldMin$ y $\AsWaldMax$; el SBC prefiere el lineal salvo con $\phi=0{,}90$. Grandes contra chicos: $p=\AsTamWald$.
+\item \textbf{En el episodio sobrecorrige:} predice $\EpVAsimTres\%$ en 2024 contra $\EpVObsTres\%$. Efecto trinquete: en 2022--24 las subas acumulan $+\AsSubasEp$ y las bajas $\AsBajasEp$; un zigzag deja efecto neto. No se interpreta ``condicional menos congelada'' en este modelo.
+\item \textbf{\emph{Lock-in}, refutado con el sustituto:} $t$ de la modulaci\'on $\LkSesentaT$ (60 meses), $\LkOchentaT$ (84), $\LkExpT$ (exponencial). Hasta 2021: $t=\LkSesentaTSub$, signo contrario. $\LkSesentaFuera$ de los 36 meses del episodio quedan fuera del rango de la brecha: extrapolaci\'on. En el episodio empeora: $\EpVLockSesentaTres\%$ en 2024 (por r\'egimen, $\EpVRegimenTres\%$).
+\end{itemize}
+
+%======================================================================
+\section{Estabilidad de la ganancia y descomposici\'on del episodio}\label{sec:estab16b}
+\textbf{Exploratoria:} definida despu\'es de ver las Secciones~\ref{sec:controles} y \ref{sec:asim}; $\EstModelos$ modelos. Responde a la regla 9 (subper\'iodos).
+\begin{itemize}[nosep]
+\item \textbf{Ganancia por tramo:} un $\delta_0$ por tramo seg\'un la fecha del cambio de la tasa, ruido com\'un; $H_0$: cinco iguales (LR, $\chi^2_4$). Quiebre en 2022: $t$ de un t\'ermino adicional desde 2022 (Chow, 1960).
+\item \textbf{Recursiva y m\'ovil} (15 a\~nos): trayectoria de la ganancia (Brown, Durbin y Evans, 1975).
+\item \textbf{Descomposici\'on de 2022--24:} observado $=$ sin cambios de tasa $+$ efecto de la tasa $+$ otros factores (puntos log, suma exacta); error del condicional en desv\'ios del propio pron\'ostico.
+\item \textbf{Fase del ciclo:} ganancia distinta si la tasa est\'a por encima o por debajo de la de 12 meses antes (sin efecto trinquete).
+\end{itemize}
+\tabla{16b_subperiodos.tex}{Ganancia por tramo.}{tab:tramos}
+\salida{16b_estabilidad.png}{1}{Izquierda: ganancia recursiva y m\'ovil. Derecha: ganancia en cada especificaci\'on (IC 95\%, condicional a $\phi$).}
+\tabla{16b_descomposicion.tex}{Descomposici\'on del episodio (promedio anual respecto de 2021, puntos logar\'itmicos).}{tab:descomp}
+\salida{16b_descomposicion.png}{0.9}{Episodio 2022--24: qu\'e parte explica la tasa.}
+\tabla{16b_fase.tex}{Ganancia por fase del ciclo de tasas.}{tab:fase}
+\begin{itemize}
+\item \textbf{La ganancia es estable:} igualdad por tramos LR $=\EstLR$ ($p=\EstLRp$). Quiebre en 2022: $t=\EstQuiebreT$ ($p=\EstQuiebreP$). Recursiva entre $\EstRecMin$ y $\EstRecMax$; m\'ovil entre $\EstMovMin$ y $\EstMovMax$ (los m\'as negativos, ventanas que terminan en 2010--13). El tramo 2006--11 es el \'unico alejado ($\EstPPTres\%$ por pp).
+\item \textbf{2024, toda la muestra:} sin cambios de tasa $+3{,}8$, tasa $-35{,}8$, otros factores $+16{,}3$; observado $-15{,}7$ ($-14{,}6\%$). Hasta 2021: $+3{,}3$, $-38{,}4$, $+19{,}3$.
+\item \textbf{Error de tama\~no normal:} $\DesErrTreintaSeisPost$ desv\'ios a 36 meses ($\DesErrTreintaSeisAnte$ con par\'ametros hasta 2021); m\'aximo mensual $\DesErrMaxAnte$. Residuos de un paso sin sesgo: media $\DesResMedia$, $z=\DesResZ$ ($p=\DesResP$), $\DesResPositivos$ positivos de 36.
+\item \textbf{Fase del ciclo:} suba $\EstFaseSube$ (ee $\EstFaseSubeEE$) contra baja $\EstFaseBaja$ (ee $\EstFaseBajaEE$), $p=\EstFaseP$; fuera de la muestra predice $\EstFaseEpTres\%$ en 2024 (RMSE $\EstFaseRMSE$). Indicio dentro de la muestra, sin respaldo fuera.
+\end{itemize}
+
+%######################################################################
+\newpage
+\parte{S\'intesis}
+
+%======================================================================
+\section{S\'intesis de resultados}\label{sec:sintesis}
+\begin{table}[H]\centering\small
+\begin{adjustbox}{max width=\linewidth}\begin{tabular}{lll}
+\toprule
+Modelo & \% de inicios por +1\,pp de tasa & Comentario \\
+\midrule
+Rezagos distribuidos (Sec.~\ref{sec:relacion}) & $\PPDoce$ (12 meses) & impreciso \\
+\textcolor{red}{Funci\'on de transferencia (Sec.~\ref{sec:mft})} & \textcolor{red}{$\TFTasaPP$} (largo plazo) & de $\TFRobPPMin$ a $\TFRobPPMax$ seg\'un el ruido \\
+VAR bivariado (Sec.~\ref{sec:var}) & $\VARelasPPDoce$ (12 meses) & sensible a $p$ \\
+VAR trivariado, tasa primero (Sec.~\ref{sec:tri}) & $\TRIelasAltPPDoce$ & v\'ia shock de bono: $\TRIelasBonoPPDoce$ (IC incluye 0) \\
+Permisos como output (Sec.~\ref{sec:permisos}) & $\TFPPermPP$ & un mes antes que los inicios \\
+Con controles de costos y oferta (Sec.~\ref{sec:controles}) & de $\CtlMatOfePP$ a $\CtlMadPP$ & la oferta es parte del canal \\
+Por tramo (Sec.~\ref{sec:estab16b}) & de $\EstPPCuatro$ a $\EstPPUno$ & salvo 2006--11: $\EstPPTres$; $p=\EstLRp$ \\
+\midrule
+Episodio 2022--24, efecto de la tasa en 2024 (Sec.~\ref{sec:episodio}) & $\EpEfectoTres\%$ & observado $\EpObsTres\%$; error de $\DesErrTreintaSeisAnte$ desv\'ios \\
+\bottomrule
+\end{tabular}\end{adjustbox}
+\caption{Todas las estimaciones del efecto de la tasa sobre los inicios.}\label{tab:sintesis}
+\end{table}
+\begin{itemize}
+\item \textbf{Efecto estable:} +1\,pp de tasa baja los inicios entre 5 y 7\% (puntos log), con dos meses de retardo, la mitad a los cuatro meses y casi todo en un a\~no. No depende del modelo, de los controles ni del tramo, salvo 2006--11.
+\item \textbf{Exogeneidad:} la retroalimentaci\'on existe pero es chica; el bloque financiero es ex\'ogeno a los inicios ($p=\TRIgrVivBloque$).
+\item \textbf{Sin relaci\'on de largo plazo:} el an\'alisis va en diferencias.
+\item \textbf{2022--24:} la tasa explica la ca\'ida y m\'as; otros factores de tama\~no normal compensaron parte. No hay quiebre.
+\item \textbf{No confirmado:} asimetr\'ia (indicio dentro de la muestra) y \emph{lock-in} (refutado con el sustituto).
+\end{itemize}
+
+%======================================================================
+\section{Limitaciones y pendientes}
+\begin{itemize}
+\item \textbf{$\phi$ poco identificado} antes de 2022; los ee de las Secciones~\ref{sec:controles} a \ref{sec:estab16b} son condicionales a $\phi=0{,}75$.
+\item \textbf{``Otros factores''} es un residuo: dice cu\'anto no explica la tasa, no qu\'e lo explica.
+\item \textbf{\emph{Lock-in}:} hace falta la tasa media de la cartera (FHFA).
+\item \textbf{VAR:} sensible a $p$; el portmanteau multivariado rechaza en el bivariado y en el trivariado.
+\item \textbf{Varianza:} heterocedasticidad en ambas series; colas pesadas en la tasa.
+\item \textbf{Estacionalidad:} la ra\'iz estacional se decidi\'o por correlograma y SBC (HEGY fuera del programa).
+\item \textbf{Pendiente (bloque D):} canal de precios (Case--Shiller), tipos de construcci\'on (unifamiliares y multifamiliares) y s\'intesis del episodio.
+\item \textbf{Citas a verificar} antes del paper: las de la secci\'on de modelo econ\'omico.
+\end{itemize}
+
+\medskip\noindent\textit{Datos:} U.S.\ Census Bureau, Freddie Mac PMMS, BLS, FRED. \textit{Teor\'ia:} Notas 1 a 6 y apunte de la c\'atedra (partes 1 y 2).
+
+\medskip\noindent\textit{Herramientas fuera del apunte:} Haugh (1976); Dickey y Pantula (1987); MacKinnon (1996, 2010); Schwert (1989); Granger y Newbold (1974); Jarque y Bera (1987); Hannan y Quinn (1979); Sims (1980) y Enders (2015, cap.~5); Hosking (1980); Gon\c{c}alves y Kilian (2004); Box, Jenkins, Reinsel y Ljung (2015); Pesaran, Shin y Smith (2001); Granger y Lee (1989); Shin, Yu y Greenwood-Nimmo (2014); Quigley (1987); Ferreira, Gyourko y Tracy (2010); Tong (1990); Chow (1960); Brown, Durbin y Evans (1975).
 
 %======================================================================
 \appendix
@@ -272,5 +550,24 @@ $F(B)=(1-B)(1-B^{12})$ en ambas series: $F(B)x_t=v(B)F(B)y_t+F(B)n_t$, con $v(B)
 \caption{Correlograma de $(1-B^{12})x$: FAC gruesa ($\rho_1=\RhoFdosUno$), le falta la diferencia regular.}
 \end{figure}
 \salida{04_modelo_sa.png}{0.8}{Modelo de la serie desestacionalizada (comparaci\'on, regla 8).}
+
+\section{Salidas de la segunda y tercera parte}
+\dos{08_modelo_intervencion.png}{08_corr_residuos.png}{Intervenci\'on: modelo con el cambio transitorio y correlograma de sus residuos.}
+\dos{04_corr_sa.png}{09_corr_alfa_tasa.png}{Output (inicios SA en diferencia) e input preblanqueado $\alpha_t$ (ruido blanco).}
+\salida{09_modelo_tasa.png}{0.8}{Funci\'on de transferencia con la tasa (D0: coeficiente de $X_{t-2}$ ya filtrado por $1/(1-\phi B)$).}
+\salida{09_corr_residuos_tasa.png}{0.6}{Residuos de la funci\'on de transferencia.}
+\dos{10_corr_residuos_dlmort.png}{10_corr_residuos_dlhoust_sa.png}{Residuos del VAR($\VARp$): ecuaci\'on de la tasa y de los inicios.}
+\salida{10_raices.png}{0.5}{Ra\'ices de la matriz compa\~nera del VAR($\VARp$).}
+\tabla{10_sigma.tex}{VAR bivariado: covarianzas y correlaci\'on de residuos.}{tab:varsigma}
+\dos{11_largo_plazo.png}{11_adf_residuos.png}{Engle--Granger: regresi\'on de largo plazo y ADF de sus residuos.}
+\tabla{12_totales.tex}{Episodio: inicios anuales (miles).}{tab:eptot}
+\salida{13_ecuacion_inicios.png}{0.8}{VAR trivariado: ecuaci\'on de los inicios.}
+\tabla{13_rezagos.tex}{VAR trivariado: elecci\'on de rezagos.}{tab:trip}
+\tabla{13_sigma.tex}{VAR trivariado: covarianzas y correlaciones de residuos.}{tab:trisigma}
+\tabla{13_irf.tex}{VAR trivariado: respuestas acumuladas.}{tab:triirf}
+\tabla{14_seleccion.tex}{Permisos: selecci\'on de la funci\'on de transferencia.}{tab:permsel}
+\dos{14_modelo_permisos.png}{14_corr_residuos.png}{Permisos: modelo y correlograma de residuos.}
+\salida{15_modelo_materiales.png}{0.8}{Funci\'on de transferencia con materiales de construcci\'on como segundo input.}
+\dos{16_modelo_asimetria.png}{16_modelo_lockin.png}{Asimetr\'ia (subas y bajas) y \emph{lock-in} (brecha de 60 meses).}
 
 \end{document}
